@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "quemo-workout",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": { "enabled": true },
+  "vars": {
+    "PUBLIC_URL": "http://localhost:8789",
+    "AUTH_URL": "http://localhost:8787"
+  },
+  "services": [{ "binding": "AUTH", "service": "quemo-auth" }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "quemo-workout", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  // Daily purge of data belonging to deleted accounts.
+  "triggers": { "crons": ["17 3 * * *"] }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "quemo",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^1.2.4",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "agents": "^0.30.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.23.0",
+    "@cloudflare/workers-types": "^5.20261025.1",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12",
+    "wrangler": "^4.152.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "node scripts/e2e.mjs",
+    "typecheck": "for d in packages/core apps/*; do (cd $d && npx tsc -p .) || exit 1; done",
+    "cf:setup": "node scripts/deploy.mjs setup",
+    "deploy": "node scripts/deploy.mjs all",
+    "deploy:auth": "node scripts/deploy.mjs auth",
+    "deploy:budget": "node scripts/deploy.mjs budget",
+    "deploy:workout": "node scripts/deploy.mjs workout",
+    "deploy:health": "node scripts/deploy.mjs health",
+    "deploy:food": "node scripts/deploy.mjs food",
+    "secret:resend": "npx wrangler secret put RESEND_API_KEY -c apps/auth/wrangler.jsonc"
+  }
+}

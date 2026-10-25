@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "quemo-auth",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": { "enabled": true },
+  "vars": {
+    // Public origin of this Worker (no trailing slash). Tokens are bound to these URLs: set them before users connect.
+    "PUBLIC_URL": "http://localhost:8787",
+    // Public origins of the four tool Workers.
+    "BUDGET_URL": "http://localhost:8788",
+    "WORKOUT_URL": "http://localhost:8789",
+    "HEALTH_URL": "http://localhost:8790",
+    "FOOD_URL": "http://localhost:8791",
+    "EMAIL_FROM": "Quemo <onboarding@resend.dev>"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "quemo-auth", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+  ],
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }]
+  // Secret: RESEND_API_KEY (wrangler secret put RESEND_API_KEY). Without it, sign-in codes are logged instead of emailed.
+}

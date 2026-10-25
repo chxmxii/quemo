@@ -1,0 +1,56 @@
+name: Deploy
+# Each Worker deploys independently, only when its own code (or the shared core) changes.
+# Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, plus a committed deploy.config.json
+# or the QUEMO_DEPLOY_CONFIG secret holding its JSON.
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "auth | budget | workout | health | food | all"
+        default: all
+  push:
+    branches: [main]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.pick.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            a="${{ inputs.app }}"; [ "$a" = all ] && a="auth budget workout health food"
+          else
+            changed=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git ls-files)
+            if echo "$changed" | grep -q '^packages/core/'; then a="auth budget workout health food"; else
+              a=$(echo "$changed" | sed -n 's#^apps/\([a-z]*\)/.*#\1#p' | sort -u | tr '\n' ' '); fi
+          fi
+          echo "apps=$(echo $a | jq -Rc 'split(" ") | map(select(length>0))')" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: changes
+    if: needs.changes.outputs.apps != '[]' && vars.QUEMO_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        app: ${{ fromJson(needs.changes.outputs.apps) }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npx -y npm@11 ci
+      - run: '[ -f deploy.config.json ] || echo "$QUEMO_DEPLOY_CONFIG" > deploy.config.json'
+        env:
+          QUEMO_DEPLOY_CONFIG: ${{ secrets.QUEMO_DEPLOY_CONFIG }}
+      - run: node scripts/deploy.mjs migrate ${{ matrix.app }}
+      - run: node scripts/deploy.mjs ${{ matrix.app }}
