@@ -24,7 +24,7 @@ export const THEME_CSS = `
   --ok:#1d4ed8;--ok-soft:rgba(59,130,246,.12);--warn:#a16207;--warn-soft:rgba(250,204,21,.16);--bad:#7e22ce;--bad-soft:rgba(126,34,206,.10);
   --ink:#111114;--on-ink:#fafafa;
   --shadow:none;
-  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.2;
+  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.38;
   --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
@@ -36,7 +36,7 @@ export const THEME_CSS = `
   --ok:#60a5fa;--ok-soft:rgba(96,165,250,.12);--warn:#fde047;--warn-soft:rgba(253,224,71,.12);--bad:#c084fc;--bad-soft:rgba(192,132,252,.12);
   --ink:#f2f2f4;--on-ink:#111114;
   --shadow:none;
-  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.22;
+  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.42;
 }}
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%}
@@ -44,15 +44,20 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* ambient light: three blurred orbs drifting behind everything */
-.aurora{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(120px);opacity:var(--blob-o)}
-.aurora i{position:absolute;border-radius:50%;display:block}
-.aurora i:nth-child(1){width:44vmax;height:30vmax;left:46%;top:2%;background:var(--blob-a);animation:driftA 40s ease-in-out infinite alternate}
-.aurora i:nth-child(2){width:36vmax;height:26vmax;left:30%;top:8%;background:var(--blob-b);animation:driftB 48s ease-in-out infinite alternate}
-.aurora i:nth-child(3){width:22vmax;height:16vmax;left:60%;top:22%;background:var(--blob-c);opacity:.7;animation:driftB 44s ease-in-out infinite alternate-reverse}
-.aurora.quiet{opacity:calc(var(--blob-o) * .6)}
-@keyframes driftA{to{transform:translate(-6vmax,3vmax)}}
-@keyframes driftB{to{transform:translate(6vmax,2vmax)}}
+/* ambient light: blurred purple / blue / yellow pools scattered around the page,
+   pulsing out of phase like a slow siren (gentle, well under 3 flashes per second) */
+.aurora{position:fixed;inset:-10vmax;z-index:0;pointer-events:none;filter:blur(90px);opacity:var(--blob-o)}
+.aurora i{position:absolute;border-radius:50%;display:block;will-change:opacity,transform}
+.aurora i:nth-child(1){width:38vmax;height:32vmax;left:-4%;top:6%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 34s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:40vmax;height:34vmax;right:-6%;top:2%;background:var(--accent);animation:sirenB 2.6s ease-in-out infinite,driftB 40s ease-in-out infinite alternate}
+.aurora i:nth-child(3){width:26vmax;height:22vmax;left:10%;bottom:-4%;background:var(--yellow);animation:sirenB 2.6s ease-in-out infinite,driftB 46s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(4){width:34vmax;height:28vmax;right:4%;bottom:-8%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 38s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(5){width:24vmax;height:20vmax;left:40%;top:38%;background:var(--accent);animation:sirenA 2.6s ease-in-out .65s infinite,driftB 50s ease-in-out infinite alternate}
+.aurora.quiet{opacity:calc(var(--blob-o) * .7)}
+@keyframes sirenA{0%,100%{opacity:1}50%{opacity:.18}}
+@keyframes sirenB{0%,100%{opacity:.18}50%{opacity:1}}
+@keyframes driftA{to{transform:translate(8vmax,6vmax) scale(1.1)}}
+@keyframes driftB{to{transform:translate(-8vmax,5vmax) scale(.9)}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -181,8 +186,7 @@ footer.foot a{color:var(--muted)}
 
 /* ---------- big centered brand ---------- */
 .brand{font:500 clamp(56px,13vw,132px)/1 var(--display);letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;margin:0;color:var(--text);
-  text-shadow:0 0 40px rgba(139,92,246,.45),0 0 90px rgba(59,130,246,.25);animation:brandIn 1.2s var(--ease) both,brandGlow 5s ease-in-out 1.2s infinite}
-@keyframes brandIn{from{opacity:0;letter-spacing:.5em;filter:blur(14px)}}
+  text-shadow:0 0 40px rgba(139,92,246,.45),0 0 90px rgba(59,130,246,.25);animation:brandGlow 5s ease-in-out infinite}
 @keyframes brandGlow{50%{text-shadow:0 0 56px rgba(139,92,246,.7),0 0 120px rgba(250,204,21,.18)}}
 .thin{font-family:var(--display);font-weight:200;letter-spacing:.01em;color:var(--text)}
 .tagline{font-size:clamp(20px,2.6vw,28px);line-height:1.3;margin:0}
@@ -235,25 +239,7 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 @keyframes wordFlash{0%{color:var(--c);text-shadow:0 0 22px var(--c),0 0 6px var(--c)}55%{color:var(--c);text-shadow:0 0 16px var(--c)}100%{color:var(--text);text-shadow:0 0 0 transparent}}
 .rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
 
-/* QUEMO intro (first visit only): a little guy walks in carrying the Q's tail, sets it, and walks off */
-.brand{position:relative;display:inline-block}
-.brand .tail{position:absolute;left:0;top:0;width:.085em;height:.3em;border-radius:.05em;background:currentColor;pointer-events:none;
-  box-shadow:0 0 18px rgba(139,92,246,.8),0 0 40px rgba(59,130,246,.35)}
-.brand.flash{animation:qFlash .9s var(--ease),brandGlow 5s ease-in-out .9s infinite}
-@keyframes qFlash{30%{text-shadow:0 0 30px #facc15,0 0 80px rgba(139,92,246,.9)}}
-.guy{position:absolute;left:0;top:0;pointer-events:none;color:var(--text);filter:drop-shadow(0 0 6px rgba(139,92,246,.8))}
-.guy svg{display:block;width:100%;height:100%;overflow:visible}
-.guy .leg,.guy .arm{transform-box:view-box}
-.guy .leg{transform-origin:20px 38px}.guy .arm{transform-origin:20px 22px}
-.guy.walking .leg.a{animation:stepA .42s ease-in-out infinite alternate}
-.guy.walking .leg.b{animation:stepA .42s ease-in-out infinite alternate-reverse}
-.guy.walking .bodyg{animation:bob .21s ease-in-out infinite alternate}
-@keyframes stepA{from{transform:rotate(24deg)}to{transform:rotate(-24deg)}}
-@keyframes bob{to{transform:translateY(-1.5px)}}
-.guy .carry{transition:opacity .2s}
-.guy.dropped .carry{opacity:0}
-.guy.wave .arm.r{animation:wave .3s ease-in-out 3 alternate}
-@keyframes wave{to{transform:rotate(-70deg)}}
+.brand{display:block;text-align:center}
 
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
@@ -325,7 +311,7 @@ export function layout({ title, body, variant = "app", head = "", bare = false }
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body${variant === "report" ? ' class="wide"' : ""}>
-<div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
 ${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
@@ -344,50 +330,6 @@ document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(
 // rotating words (width follows the active word so the sentence stays centered)
 document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
   if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
-// QUEMO intro, first visit only: a little guy walks in with the Q's tail, places it, waves, walks off
-document.querySelectorAll(".brand[data-intro]").forEach(b=>{
-  const q=b.querySelector(".q");if(!q||still)return;
-  let seen=false;try{seen=localStorage.getItem("quemo_intro")==="1"}catch{}
-  if(seen)return;
-  try{localStorage.setItem("quemo_intro","1")}catch{}
-  q.textContent="O";
-  const guy=document.createElement("div");guy.className="guy";guy.setAttribute("aria-hidden","true");
-  guy.innerHTML='<svg viewBox="0 0 40 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><g class="bodyg">'+
-    '<rect class="carry" x="6" y="-4" width="28" height="4.5" rx="2" fill="currentColor" stroke="none"/>'+
-    '<circle cx="20" cy="10" r="6.5" fill="currentColor" stroke="none"/><line x1="20" y1="17" x2="20" y2="38"/>'+
-    '<line class="arm l" x1="20" y1="22" x2="9" y2="3"/><line class="arm r" x1="20" y1="22" x2="31" y2="3"/></g>'+
-    '<line class="leg a" x1="20" y1="38" x2="20" y2="57"/><line class="leg b" x1="20" y1="38" x2="20" y2="57"/></svg>';
-  const tail=document.createElement("i");tail.className="tail";tail.setAttribute("aria-hidden","true");tail.style.opacity="0";
-  b.append(tail,guy);
-  const wait=ms=>new Promise(r=>setTimeout(r,ms));
-  const go=async()=>{
-    const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);
-    const h=em*.46,w=h*40/60,feet=qr.bottom-br.top+em*.1,top=feet-h;
-    const ex=qr.right-br.left-qr.width*.36,ey=qr.bottom-br.top-em*.3;
-    const stopX=ex+em*.1,startX=br.width+em*.35,speed=em*2.8;
-    guy.style.width=w+"px";guy.style.height=h+"px";
-    const at=(x,flip)=>"translate("+x+"px,"+top+"px)"+(flip?" scaleX(-1)":"");
-    guy.classList.add("walking");
-    const inDur=(startX-stopX)/speed*1000;
-    await guy.animate([{transform:at(startX,1),opacity:0},{transform:at(startX-em*.3,1),opacity:1,offset:.08},{transform:at(stopX,1),opacity:1}],{duration:inDur,easing:"linear",fill:"forwards"}).finished;
-    guy.classList.remove("walking");
-    await wait(180);
-    // lift the tail off his hands and set it on the O
-    guy.classList.add("dropped");tail.style.opacity="1";
-    const hx=stopX+w/2-em*.04,hy=top-em*.12;
-    await tail.animate([{transform:"translate("+hx+"px,"+hy+"px) rotate(90deg)"},{transform:"translate("+((hx+ex)/2)+"px,"+(hy-em*.25)+"px) rotate(10deg)",offset:.5},{transform:"translate("+ex+"px,"+ey+"px) rotate(-42deg)"}],{duration:620,easing:"cubic-bezier(.3,.7,.2,1)",fill:"forwards"}).finished;
-    tail.style.transform="translate("+ex+"px,"+ey+"px) rotate(-42deg)";
-    b.classList.add("flash");
-    guy.animate([{transform:at(stopX,1)},{transform:"translate("+stopX+"px,"+(top-em*.12)+"px) scaleX(-1)"},{transform:at(stopX,1)}],{duration:380,easing:"ease-out"});
-    guy.classList.add("wave");await wait(1000);guy.classList.remove("wave");
-    guy.classList.add("walking");
-    await guy.animate([{transform:at(stopX,0),opacity:1},{transform:at(startX-em*.3,0),opacity:1,offset:.9},{transform:at(startX,0),opacity:0}],{duration:inDur,easing:"linear",fill:"forwards"}).finished;
-    guy.remove();
-    // keep the tail glued to the O on resize
-    addEventListener("resize",()=>{const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);tail.style.transform="translate("+(qr.right-br.left-qr.width*.36)+"px,"+(qr.bottom-br.top-em*.3)+"px) rotate(-42deg)"});
-  };
-  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,1300));
-});
 if(still)return;
 // cursor glow with easing
 const g=document.querySelector(".glow");if(g&&matchMedia("(hover:hover)").matches){let x=innerWidth/2,y=innerHeight/3,tx=x,ty=y;addEventListener("pointermove",e=>{tx=e.clientX;ty=e.clientY;g.classList.add("on")});(function f(){x+=(tx-x)*.08;y+=(ty-y)*.08;g.style.transform="translate("+x+"px,"+y+"px)";requestAnimationFrame(f)})()}
