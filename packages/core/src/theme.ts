@@ -165,7 +165,72 @@ section.block{display:grid;gap:14px;padding:40px 0 0}
 footer.foot{position:relative;z-index:2;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:760px;margin:0 auto;padding:40px 20px 36px;color:var(--faint);font-size:13px}
 footer.foot a{color:var(--muted)}
 
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ---------- motion layer ---------- */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.38s;animation-timing-function:cubic-bezier(.16,1,.3,1)}
+
+/* faint dot grid, fading out toward the edges */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(var(--border-2) 1px,transparent 1.2px);background-size:22px 22px;
+  -webkit-mask:radial-gradient(ellipse 70% 60% at 50% 20%,#000 20%,transparent 75%);mask:radial-gradient(ellipse 70% 60% at 50% 20%,#000 20%,transparent 75%)}
+/* cursor-following glow (positioned by JS) */
+.glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle,var(--accent-soft) 0%,transparent 65%);opacity:0;transition:opacity .6s ease;will-change:transform}
+.glow.on{opacity:1}
+@media (hover:none){.glow{display:none}}
+
+/* word-by-word blur reveal */
+.reveal .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(.25em);animation:wordIn .9s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 80ms)}
+@keyframes wordIn{to{opacity:1;filter:blur(0);transform:none}}
+
+/* rotating word: all words share one grid cell, the active one slides + unblurs in */
+.rotator{display:inline-grid;vertical-align:bottom;color:var(--accent-ink)}
+.rotator>span{grid-area:1/1;opacity:0;filter:blur(8px);transform:translateY(.45em);transition:opacity .55s var(--ease),filter .55s var(--ease),transform .55s var(--ease)}
+.rotator>span.on{opacity:1;filter:blur(0);transform:none}
+.rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
+
+/* light beam that orbits a field while it is focused */
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.beam{position:relative;border-radius:14px;padding:1px;background:var(--border-2)}
+.beam::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;transition:opacity .35s ease;
+  background:conic-gradient(from var(--a),transparent 0 62%,var(--blob-b) 74%,var(--accent) 86%,transparent 96%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 2.6s linear infinite}
+.beam:focus-within::before{opacity:1}
+.beam input{border:0;border-radius:13px;box-shadow:none!important}
+@keyframes spin{to{--a:360deg}}
+
+/* buttons: sliding arrow, shine sweep, loading shimmer */
+.btn .ph-arrow-right,button .ph-arrow-right{transition:transform .3s var(--ease)}
+.btn:hover .ph-arrow-right,button:hover .ph-arrow-right{transform:translateX(3px)}
+button:not(.ghost){position:relative;overflow:hidden}
+button:not(.ghost)::after{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%)}
+button:not(.ghost):hover::after{transform:translateX(120%);transition:transform .8s var(--ease)}
+button.loading{pointer-events:none;opacity:.75}
+button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
+@keyframes shimmer{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+
+/* rows: hover wash slides in from the left */
+.rows>*{position:relative}
+.rows>*::before{content:"";position:absolute;inset:0 -12px;border-radius:12px;background:var(--surface-2);transform:scaleX(.96);opacity:0;z-index:-1;transition:opacity .3s var(--ease),transform .4s var(--ease)}
+.rows>*:hover::before{opacity:1;transform:none}
+.rows.stagger>*{opacity:0;animation:rise .7s var(--ease) forwards;animation-delay:calc(var(--i,0) * 60ms + 150ms)}
+/* live status: real linked state only */
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:7px;position:relative;top:-1px}
+.dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);animation:ping 2.4s var(--ease) infinite}
+@keyframes ping{70%,100%{transform:scale(2.6);opacity:0}}
+
+/* tabs: sliding pill indicator */
+.tablist{position:relative}
+.tablist .ind{position:absolute;top:4px;left:0;height:calc(100% - 8px);border-radius:999px;background:var(--solid);box-shadow:0 1px 3px rgba(0,0,0,.08);transition:transform .45s var(--ease),width .45s var(--ease);z-index:0}
+.tablist label{position:relative;z-index:1}
+.tablist.js label{background:transparent!important;box-shadow:none!important}
+.tabpanel{animation:rise .45s var(--ease)}
+
+/* copy feedback */
+[data-copy].done{color:var(--ok)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}}
 @media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
@@ -199,11 +264,31 @@ export function layout({ title, body, variant = "app", head = "", bare = false }
 ${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
+<div class="glow" aria-hidden="true"></div>
 <script>
-document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';setTimeout(()=>b.innerHTML=o,1400)})});
+(()=>{
+const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';b.classList.add("done");setTimeout(()=>{b.innerHTML=o;b.classList.remove("done")},1400)})});
 document.querySelectorAll(".spot").forEach(el=>el.addEventListener("pointermove",e=>{const r=el.getBoundingClientRect();el.style.setProperty("--x",(e.clientX-r.left)+"px");el.style.setProperty("--y",(e.clientY-r.top)+"px")}));
+document.addEventListener("submit",e=>{const b=e.submitter||e.target.querySelector("button");if(b&&!b.classList.contains("ghost"))setTimeout(()=>b.classList.add("loading"),0)});
+document.querySelectorAll(".rows.stagger>*").forEach((el,i)=>el.style.setProperty("--i",i));
+// sliding tab indicator
+document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(".tablist");if(!list)return;const ind=document.createElement("span");ind.className="ind";list.prepend(ind);list.classList.add("js");
+  const move=()=>{const r=tabs.querySelector("input:checked");if(!r)return;const l=list.querySelector('label[for="'+r.id+'"]');ind.style.width=l.offsetWidth+"px";ind.style.transform="translateX("+l.offsetLeft+"px)";list.querySelectorAll("label").forEach(x=>x.style.color=x===l?"var(--text)":"")};
+  tabs.addEventListener("change",move);addEventListener("resize",move);move()});
+if(still)return;
+// rotating words
+document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;w[0].classList.add("on");setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on")},2300)});
+// cursor glow with easing
+const g=document.querySelector(".glow");if(g&&matchMedia("(hover:hover)").matches){let x=innerWidth/2,y=innerHeight/3,tx=x,ty=y;addEventListener("pointermove",e=>{tx=e.clientX;ty=e.clientY;g.classList.add("on")});(function f(){x+=(tx-x)*.08;y+=(ty-y)*.08;g.style.transform="translate("+x+"px,"+y+"px)";requestAnimationFrame(f)})()}
+})();
 </script>
 </body></html>`;
+}
+
+/** Wraps each word so it can blur-reveal in sequence. Pass already-escaped HTML-free text. */
+export function revealWords(text: string, start = 0): string {
+  return text.split(" ").map((w, i) => `<span class="w" style="--i:${i + start}">${escapeHtml(w)}</span>`).join(" ");
 }
 
 export function htmlResponse(html: string, status = 200, headers: HeadersInit = {}): Response {

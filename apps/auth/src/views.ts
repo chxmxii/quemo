@@ -1,5 +1,5 @@
 import type { ConsentDescription } from "@cloudflare/workers-oauth-provider";
-import { copyBlock, escapeHtml as e, layout, localTime, TOOLS, wordmark, type Profile, type ToolId } from "@quemo/core";
+import { copyBlock, escapeHtml as e, layout, localTime, revealWords, TOOLS, wordmark, type Profile, type ToolId } from "@quemo/core";
 import { API_KEY_PREFIX, safeNext, TOOL_IDS } from "./lib";
 
 export function page(title: string, body: string, variant: "hero" | "app" = "app", bare = false): string {
@@ -15,15 +15,15 @@ export function signInView(next: string | null, error?: string, tool?: ToolId): 
     "quemo",
     narrow(`<div style="display:grid;gap:12px">
     ${tool ? `<p class="small muted">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
-    <h1>Track your life from any chat.</h1>
-    <p class="lede">Money, training, meds and meals. Logged by talking to Claude, ChatGPT or any MCP app.</p>
+    <h1 class="reveal" aria-label="Track your life from any chat.">${revealWords("Track your")}<br><span class="w rotator" style="--i:2"><span>money.</span><span>workouts.</span><span>meds.</span><span>meals.</span></span></h1>
+    <p class="lede rise d2">Just tell Claude, ChatGPT or any MCP app. quemo keeps the records.</p>
   </div>
-  <form method="post" action="/auth/email" style="display:grid;gap:10px">
+  <form method="post" action="/auth/email" class="rise d3" style="display:grid;gap:10px">
     <input type="hidden" name="next" value="${e(safeNext(next))}"><input type="hidden" name="tz" id="tz">
     <label for="email">Email</label>
-    <input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required autofocus>
+    <div class="beam"><input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required autofocus></div>
     ${error ? `<p class="small" style="color:var(--bad)">${e(error)}</p>` : ""}
-    <button style="margin-top:4px">Get my code</button>
+    <button style="margin-top:4px">Get my code<i class="ph ph-arrow-right"></i></button>
     <p class="hint">No password. New or returning, it's the same step.</p>
   </form>
   <script>try{document.getElementById("tz").value=Intl.DateTimeFormat().resolvedOptions().timeZone}catch{}</script>`),
@@ -35,15 +35,15 @@ export function checkInboxView(email: string, next: string, notice?: string): st
   return page(
     "Check your inbox",
     narrow(`<div style="display:grid;gap:12px">
-    <h1>Check your inbox.</h1>
-    <p class="lede">We sent a 6-digit code and a link to ${e(email)}.</p>
+    <h1 class="reveal">${revealWords("Check your inbox.")}</h1>
+    <p class="lede rise d2">We sent a 6-digit code and a link to ${e(email)}.</p>
   </div>
   <form method="post" action="/auth/code" style="display:grid;gap:10px">
     <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
     <label for="code">Code</label>
-    <input id="code" class="otp" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="6" required autofocus>
+    <div class="beam" style="max-width:340px"><input id="code" class="otp" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="6" required autofocus></div>
     ${notice ? `<p class="small" style="color:var(--warn)">${e(notice)}</p>` : ""}
-    <button style="margin-top:4px">Continue</button>
+    <button style="margin-top:4px;justify-self:start">Continue<i class="ph ph-arrow-right"></i></button>
   </form>
   <form method="post" action="/auth/email">
     <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
@@ -55,16 +55,16 @@ export function checkInboxView(email: string, next: string, notice?: string): st
 export function confirmView(token: string, next: string): string {
   return page(
     "Sign in",
-    narrow(`<h1>Almost there.</h1>
+    narrow(`<h1 class="reveal">${revealWords("Almost there.")}</h1>
   <form method="post" action="/auth/verify">
     <input type="hidden" name="token" value="${e(token)}"><input type="hidden" name="next" value="${e(safeNext(next))}">
-    <button>Continue to quemo</button>
+    <button>Continue to quemo<i class="ph ph-arrow-right"></i></button>
   </form>`),
   );
 }
 
 export function messageView(title: string, message: string): string {
-  return page(title, narrow(`<div style="display:grid;gap:12px"><h1>${e(title)}.</h1><p class="lede">${e(message)}</p></div><a class="btn ghost" href="/" style="justify-self:start">Back</a>`));
+  return page(title, narrow(`<div style="display:grid;gap:12px"><h1 class="reveal">${revealWords(`${title}.`)}</h1><p class="lede">${e(message)}</p></div><a class="btn ghost" href="/" style="justify-self:start">Back</a>`));
 }
 
 // ---------- OAuth consent ----------
@@ -74,10 +74,10 @@ export function consentView(details: ConsentDescription, tool: ToolId | undefine
   return page(
     `Connect ${details.clientName}`,
     narrow(`<div style="display:grid;gap:12px">
-    <h1>Allow ${e(details.clientName)}?</h1>
+    <h1 class="reveal" aria-label="Allow ${e(details.clientName)}?">${revealWords(`Allow ${details.clientName}?`)}</h1>
     <p class="lede">It will be able to read and update your ${t ? e(t.name) : "quemo"} data, and nothing from your other tools.</p>
   </div>
-  <div class="rows small">
+  <div class="rows stagger small">
     <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Account</span><span>${e(email)}</span></div>
     <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Sends access to</span><span>${e(details.redirectHost)}</span></div>
     <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Publisher</span><span>${details.clientDomain ? e(details.clientDomain) : "Not verified"}</span></div>
@@ -122,7 +122,7 @@ export function dashboardView({ user, keys, connected, urls, flash }: DashboardD
   const tools = TOOL_IDS.map((t) => {
     const n = connected.get(t) ?? 0;
     return `<div class="tool" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:center">
-  <div style="display:grid;gap:2px"><span style="font-weight:500">${e(TOOLS[t].name)}</span><span class="small muted">${n ? `${n} app${n > 1 ? "s" : ""} linked` : "Not linked yet"}</span></div>
+  <div style="display:grid;gap:2px"><span style="font-weight:500">${e(TOOLS[t].name)}</span><span class="small muted">${n ? `<span class="dot"></span>${n} app${n > 1 ? "s" : ""} linked` : "Not linked yet"}</span></div>
   ${copyBlock(`url-${t}`, urls[t])}
 </div>`;
   }).join("");
@@ -145,13 +145,13 @@ export function dashboardView({ user, keys, connected, urls, flash }: DashboardD
     .join("");
 
   const body = `<section class="rise" style="padding:9vh 0 0;display:grid;gap:10px">
-  <h1>${greeting(user.timezone)}${user.name ? `, ${e(user.name)}` : ""}.</h1>
-  <p class="lede">Add a tool's link to your AI app, then just talk to it.</p>
+  <h1 class="reveal">${revealWords(`${greeting(user.timezone)}${user.name ? `, ${user.name}` : ""}.`)}</h1>
+  <p class="lede rise d2">Add a tool's link to your AI app, then just talk to it.</p>
 </section>
 ${newKey ? `<section class="block"><h2>New API key</h2><p class="small muted">Shown once. Works with all four tools.</p>${copyBlock("newkey", newKey)}</section>` : ""}
 ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">${e(flash)}</p>` : ""}
 
-<section class="block"><h2>Tools</h2><div class="rows">${tools}</div></section>
+<section class="block"><h2>Tools</h2><div class="rows stagger">${tools}</div></section>
 
 <section class="block"><h2>Connect</h2>
   <div class="tabs">
