@@ -1,5 +1,5 @@
 /**
- * Quemo's shared look: warm aurora light blurred behind frosted-glass surfaces.
+ * Quemo's shared look: a smooth dusk-sky gradient behind frosted-glass surfaces, dark only.
  * Used by quemo-auth pages and by every tool's printable report.
  *
  * Shape system: containers 20px, inputs 12px, buttons and chips are full pills.
@@ -16,19 +16,7 @@ const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
 export const THEME_CSS = `
 :root{
-  color-scheme:light dark;
-  --bg:#fafafa;--text:#111114;--muted:#5d5d68;--faint:#8b8b96;
-  --surface:rgba(255,255,255,.58);--surface-2:rgba(255,255,255,.78);--solid:#ffffff;
-  --border:rgba(17,17,20,.08);--border-2:rgba(17,17,20,.14);--hi:rgba(255,255,255,.75);
-  --accent:#8b5cf6;--accent-ink:#6d28d9;--accent-soft:rgba(139,92,246,.12);--blue:#3b82f6;--yellow:#facc15;--pink:#ec4899;
-  --ok:#1d4ed8;--ok-soft:rgba(59,130,246,.12);--warn:#a16207;--warn-soft:rgba(250,204,21,.16);--bad:#7e22ce;--bad-soft:rgba(126,34,206,.10);
-  --ink:#111114;--on-ink:#fafafa;
-  --shadow:none;
-  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.5;
-  --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
-  --ease:cubic-bezier(.16,1,.3,1);
-}
-@media (prefers-color-scheme:dark){:root{
+  color-scheme:dark;
   --bg:#050507;--text:#f2f2f4;--muted:#a1a1ab;--faint:#71717b;
   --surface:rgba(26,26,31,.52);--surface-2:rgba(34,34,40,.72);--solid:#17171b;
   --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--hi:rgba(255,255,255,.07);
@@ -37,27 +25,33 @@ export const THEME_CSS = `
   --ink:#f2f2f4;--on-ink:#111114;
   --shadow:none;
   --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.55;
-}}
+  --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);letter-spacing:-.006em;background:var(--bg);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* ambient light: a siren bar glowing at the bottom center. Blue, purple, pink and yellow pools
-   sit side by side just above the content and pulse out of phase (slow, never a strobe). */
-.aurora{position:fixed;left:50%;bottom:-16vmax;width:min(1100px,120vw);height:46vmax;transform:translateX(-50%);z-index:0;pointer-events:none;filter:blur(70px);opacity:var(--blob-o)}
-.aurora i{position:absolute;bottom:0;border-radius:50%;display:block;will-change:opacity,transform}
-.aurora i:nth-child(1){width:30%;height:70%;left:4%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 18s ease-in-out infinite alternate}
-.aurora i:nth-child(2){width:30%;height:72%;left:24%;background:var(--accent);animation:sirenB 2.6s ease-in-out infinite,driftB 22s ease-in-out infinite alternate}
-.aurora i:nth-child(3){width:28%;height:66%;left:46%;background:var(--pink);animation:sirenA 2.6s ease-in-out .65s infinite,driftA 20s ease-in-out infinite alternate-reverse}
-.aurora i:nth-child(4){width:30%;height:70%;left:66%;background:var(--blue);animation:sirenB 2.6s ease-in-out infinite,driftB 24s ease-in-out infinite alternate-reverse}
-.aurora i:nth-child(5){width:16%;height:40%;left:42%;bottom:18%;background:var(--yellow);animation:sirenB 2.6s ease-in-out .65s infinite,driftA 26s ease-in-out infinite alternate}
-.aurora.quiet{opacity:calc(var(--blob-o) * .7)}
-@keyframes sirenA{0%,100%{opacity:1}50%{opacity:.18}}
-@keyframes sirenB{0%,100%{opacity:.18}50%{opacity:1}}
-@keyframes driftA{to{transform:translate(4%,-6%) scale(1.08)}}
-@keyframes driftB{to{transform:translate(-4%,-5%) scale(.92)}}
+/* GTA-style dusk sky: a smooth pink / purple / blue / yellow gradient that slowly breathes.
+   Base layer is a static gradient, the glow layer drifts very slowly (no pulsing). */
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:
+    radial-gradient(120% 70% at 50% 118%,rgba(250,204,21,.55) 0%,rgba(236,72,153,.45) 28%,transparent 62%),
+    radial-gradient(90% 60% at 12% 100%,rgba(236,72,153,.55),transparent 60%),
+    radial-gradient(90% 60% at 88% 100%,rgba(139,92,246,.6),transparent 62%),
+    radial-gradient(110% 70% at 50% -10%,rgba(37,99,235,.45),transparent 60%),
+    linear-gradient(180deg,#05040c 0%,#0d0a24 38%,#2a0f45 70%,#5b1650 100%)}
+.sky i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;will-change:transform}
+.sky i:nth-child(1){width:60vmax;height:40vmax;left:-15vmax;bottom:-16vmax;background:#ec4899;animation:skyA 38s ease-in-out infinite alternate}
+.sky i:nth-child(2){width:60vmax;height:40vmax;right:-15vmax;bottom:-14vmax;background:#8b5cf6;animation:skyB 44s ease-in-out infinite alternate}
+.sky i:nth-child(3){width:46vmax;height:26vmax;left:50%;bottom:-12vmax;margin-left:-23vmax;background:#facc15;opacity:.38;animation:skyC 30s ease-in-out infinite alternate}
+.sky i:nth-child(4){width:70vmax;height:34vmax;left:50%;top:-22vmax;margin-left:-35vmax;background:#2563eb;opacity:.4;animation:skyC 52s ease-in-out infinite alternate-reverse}
+.sky.quiet{opacity:.65}
+@keyframes skyA{to{transform:translate(14vmax,-5vmax) scale(1.12)}}
+@keyframes skyB{to{transform:translate(-14vmax,-4vmax) scale(1.08)}}
+@keyframes skyC{to{transform:translate(0,-3vmax) scale(1.15)}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -85,7 +79,7 @@ p{margin:0}
 .spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
   background:radial-gradient(420px circle at var(--x) var(--y),var(--accent-soft),transparent 60%)}
 .spot:hover::after{opacity:1}
-@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.aurora{display:none}}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.sky i{display:none}}
 
 /* forms */
 .field{display:grid;gap:7px}
@@ -212,6 +206,13 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 .center .copy{justify-content:center}
 .center .copy pre{text-align:center}
 
+/* full-viewport centering */
+body.fill{position:relative}
+body.fill main.shell{min-height:100dvh;display:grid;place-items:center;padding-top:0;padding-bottom:0}
+body.fill main.shell>*{width:100%}
+body.fill .navwrap{position:absolute;top:0;left:0;right:0}
+body.fill footer.foot{position:absolute;bottom:0;left:0;right:0;max-width:none}
+
 /* reports and any remaining blocks sit on the middle axis too */
 .wide main{text-align:center}
 .wide main header,.wide main section{justify-items:center}
@@ -235,7 +236,7 @@ footer.foot{text-align:center}
 .glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;z-index:0;pointer-events:none;
   background:radial-gradient(circle,var(--accent-soft) 0%,transparent 65%);opacity:0;transition:opacity .6s ease;will-change:transform}
 .glow.on{opacity:1}
-@media (hover:none){.glow{display:none}}
+@media (hover:none){.glow{display:none}.sky i{animation:none}}
 
 /* word-by-word blur reveal */
 .reveal .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(.25em);animation:wordIn .9s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 80ms)}
@@ -295,11 +296,11 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 /* copy feedback */
 [data-copy].done{color:var(--ok)}
 
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}.sky i{animation:none}}
 @media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
-  html,body{background:#fff!important;color:#111}.aurora,.grain,.noprint,nav.top,footer.foot{display:none!important}
+  html,body{background:#fff!important;color:#111}.sky,.noprint,nav.top,footer.foot{display:none!important}
   .glass{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid #e4e4e7}
   .shell{max-width:none;padding:0}section,.kpi,tr{break-inside:avoid}h2,h3{break-after:avoid}
 }
@@ -308,25 +309,27 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 export interface LayoutOptions {
   title: string;
   body: string;
-  /** "hero" = full aurora, "app" = calmer aurora, "report" = calm + print-first. */
+  /** "hero" = full sky, "app" = dimmer sky, "report" = dimmer sky + print-first. */
   variant?: "hero" | "app" | "report";
   head?: string;
   /** Hide the default top nav (pages that render their own). */
   bare?: boolean;
+  /** Center the content in the full viewport (nav and footer float over the edges). */
+  fill?: boolean;
 }
 
 export const wordmark = (href = "/") => `<a class="wordmark" href="${escapeHtml(href)}"><span class="mark">q</span>quemo</a>`;
 
-export function layout({ title, body, variant = "app", head = "", bare = false }: LayoutOptions): string {
+export function layout({ title, body, variant = "app", head = "", bare = false, fill = false }: LayoutOptions): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}">
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
-<style>${THEME_CSS}</style>${head}</head><body${variant === "report" ? ' class="wide"' : ""}>
-<div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
+<style>${THEME_CSS}</style>${head}</head><body class="${variant === "report" ? "wide" : ""}${fill ? " fill" : ""}">
+<div class="sky${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
 <div class="glow" aria-hidden="true"></div>

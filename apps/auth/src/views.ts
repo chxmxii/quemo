@@ -2,16 +2,16 @@ import type { ConsentDescription } from "@cloudflare/workers-oauth-provider";
 import { copyBlock, escapeHtml as e, layout, localTime, revealWords, TOOLS, wordmark, type Profile, type ToolId } from "@quemo/core";
 import { API_KEY_PREFIX, safeNext, TOOL_IDS } from "./lib";
 
-export function page(title: string, body: string, variant: "hero" | "app" = "app", bare = false): string {
-  return layout({ title, body, variant, bare });
+export function page(title: string, body: string, variant: "hero" | "app" = "app", bare = false, fill = body.startsWith("<section data-fill")): string {
+  return layout({ title, body, variant, bare, fill });
 }
 
 // ---------- sign in / sign up ----------
 
-const narrow = (inner: string) => `<section class="rise center" style="max-width:440px;margin:0 auto;padding:12vh 0 8vh;display:grid;gap:28px">${inner}</section>`;
+const narrow = (inner: string) => `<section data-fill class="rise center" style="max-width:440px;margin:0 auto;padding:96px 0;display:grid;gap:28px">${inner}</section>`;
 
 export function signInView(next: string | null, error?: string, tool?: ToolId): string {
-  const body = `<section class="center" style="min-height:calc(100dvh - 90px);max-width:520px;margin:0 auto;display:grid;align-content:center;gap:34px;padding:40px 0">
+  const body = `<section class="center" style="max-width:560px;margin:0 auto;display:grid;gap:34px;padding:80px 0">
   <div style="display:grid;gap:18px">
     ${tool ? `<p class="small muted rise">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
     <h1 class="brand">Quemo</h1>
@@ -26,7 +26,7 @@ export function signInView(next: string | null, error?: string, tool?: ToolId): 
   </form>
   <script>try{document.getElementById("tz").value=Intl.DateTimeFormat().resolvedOptions().timeZone}catch{}</script>
 </section>`;
-  return layout({ title: "quemo", body, variant: "hero", bare: true });
+  return layout({ title: "quemo", body, variant: "hero", bare: true, fill: true });
 }
 
 export function checkInboxView(email: string, next: string, notice?: string): string {
