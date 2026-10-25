@@ -14,7 +14,7 @@ export function signInView(next: string | null, error?: string, tool?: ToolId): 
   const body = `<section class="center" style="min-height:calc(100dvh - 90px);max-width:520px;margin:0 auto;display:grid;align-content:center;gap:34px;padding:40px 0">
   <div style="display:grid;gap:18px">
     ${tool ? `<p class="small muted rise">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
-    <div><h1 class="brand" data-intro aria-label="Quemo"><span class="q" aria-hidden="true">Q</span><span class="u" aria-hidden="true">U</span><span aria-hidden="true">EMO</span></h1></div>
+    <div><h1 class="brand" data-intro aria-label="Quemo"><span class="q" aria-hidden="true">Q</span><span aria-hidden="true">UEMO</span></h1></div>
     <p class="tagline thin reveal" style="color:var(--text)" aria-label="Track your money, workouts, health and meals from any chat.">${revealWords("Track your", 3)} <span class="w rotator" style="--i:5"><span>money.</span><span>workouts.</span><span>health.</span><span>meals.</span></span></p>
     <p class="lede thin rise d3">Just tell Claude, ChatGPT or any MCP app.</p>
   </div>

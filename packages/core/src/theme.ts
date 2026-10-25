@@ -235,14 +235,25 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 @keyframes wordFlash{0%{color:var(--c);text-shadow:0 0 22px var(--c),0 0 6px var(--c)}55%{color:var(--c);text-shadow:0 0 16px var(--c)}100%{color:var(--text);text-shadow:0 0 0 transparent}}
 .rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
 
-/* QUEMO intro: the U stretches too long, a piece snaps off, falls and lands as the Q's tail */
+/* QUEMO intro (first visit only): a little guy walks in carrying the Q's tail, sets it, and walks off */
 .brand{position:relative;display:inline-block}
-.brand .u{display:inline-block;transform-origin:50% 88%}
-.brand .tail{position:absolute;left:0;top:0;width:.085em;height:.3em;border-radius:.05em;background:currentColor;opacity:0;pointer-events:none;
+.brand .tail{position:absolute;left:0;top:0;width:.085em;height:.3em;border-radius:.05em;background:currentColor;pointer-events:none;
   box-shadow:0 0 18px rgba(139,92,246,.8),0 0 40px rgba(59,130,246,.35)}
-.brand.landed .tail{opacity:1}
 .brand.flash{animation:qFlash .9s var(--ease),brandGlow 5s ease-in-out .9s infinite}
 @keyframes qFlash{30%{text-shadow:0 0 30px #facc15,0 0 80px rgba(139,92,246,.9)}}
+.guy{position:absolute;left:0;top:0;pointer-events:none;color:var(--text);filter:drop-shadow(0 0 6px rgba(139,92,246,.8))}
+.guy svg{display:block;width:100%;height:100%;overflow:visible}
+.guy .leg,.guy .arm{transform-box:view-box}
+.guy .leg{transform-origin:20px 38px}.guy .arm{transform-origin:20px 22px}
+.guy.walking .leg.a{animation:stepA .42s ease-in-out infinite alternate}
+.guy.walking .leg.b{animation:stepA .42s ease-in-out infinite alternate-reverse}
+.guy.walking .bodyg{animation:bob .21s ease-in-out infinite alternate}
+@keyframes stepA{from{transform:rotate(24deg)}to{transform:rotate(-24deg)}}
+@keyframes bob{to{transform:translateY(-1.5px)}}
+.guy .carry{transition:opacity .2s}
+.guy.dropped .carry{opacity:0}
+.guy.wave .arm.r{animation:wave .3s ease-in-out 3 alternate}
+@keyframes wave{to{transform:rotate(-70deg)}}
 
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
@@ -333,29 +344,49 @@ document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(
 // rotating words (width follows the active word so the sentence stays centered)
 document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
   if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
-// QUEMO intro: swap the Q for an O + a separate tail, then drop the tail from a stretched U
+// QUEMO intro, first visit only: a little guy walks in with the Q's tail, places it, waves, walks off
 document.querySelectorAll(".brand[data-intro]").forEach(b=>{
-  const q=b.querySelector(".q"),u=b.querySelector(".u");if(!q||!u)return;
-  const tail=document.createElement("i");tail.className="tail";tail.setAttribute("aria-hidden","true");b.appendChild(tail);
-  const spot=()=>{const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),ur=u.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);
-    return{end:[qr.right-br.left-qr.width*.36,qr.bottom-br.top-em*.3],start:[ur.left-br.left+ur.width*.5-em*.04,ur.top-br.top-em*.35],em}};
-  const place=()=>{const p=spot();tail.style.transform="translate("+p.end[0]+"px,"+p.end[1]+"px) rotate(-42deg)"};
-  const run=()=>{
-    q.textContent="O";b.classList.remove("landed");
-    if(still){b.classList.add("landed");place();return}
-    const p=spot(),[sx,sy]=p.start,[ex,ey]=p.end,mx=(sx+ex)/2,my=Math.min(sy,ey)-p.em*.55;
-    u.animate([{transform:"scaleY(1)"},{transform:"scaleY(1.55)",offset:.45},{transform:"scaleY(1.6)",offset:.6},{transform:"scaleY(.9)",offset:.72},{transform:"scaleY(1.04)",offset:.85},{transform:"scaleY(1)"}],{duration:1300,easing:"cubic-bezier(.3,.7,.2,1)"});
-    setTimeout(()=>{b.classList.add("landed");
-      const a=tail.animate([
-        {transform:"translate("+sx+"px,"+sy+"px) rotate(0deg)",opacity:1},
-        {transform:"translate("+mx+"px,"+my+"px) rotate(-200deg)",offset:.45},
-        {transform:"translate("+ex+"px,"+ey+"px) rotate(-402deg)",offset:.82},
-        {transform:"translate("+ex+"px,"+(ey-p.em*.06)+"px) rotate(-396deg)",offset:.9},
-        {transform:"translate("+ex+"px,"+ey+"px) rotate(-402deg)"}],{duration:1100,easing:"cubic-bezier(.45,0,.55,1)",fill:"forwards"});
-      a.onfinish=()=>{place();a.cancel();b.classList.remove("flash");void b.offsetWidth;b.classList.add("flash")}},780)};
-  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(run,still?0:1300));
-  addEventListener("resize",()=>b.classList.contains("landed")&&place());
-  b.addEventListener("click",run);b.style.cursor="pointer";b.title="Replay";
+  const q=b.querySelector(".q");if(!q||still)return;
+  let seen=false;try{seen=localStorage.getItem("quemo_intro")==="1"}catch{}
+  if(seen)return;
+  try{localStorage.setItem("quemo_intro","1")}catch{}
+  q.textContent="O";
+  const guy=document.createElement("div");guy.className="guy";guy.setAttribute("aria-hidden","true");
+  guy.innerHTML='<svg viewBox="0 0 40 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><g class="bodyg">'+
+    '<rect class="carry" x="6" y="-4" width="28" height="4.5" rx="2" fill="currentColor" stroke="none"/>'+
+    '<circle cx="20" cy="10" r="6.5" fill="currentColor" stroke="none"/><line x1="20" y1="17" x2="20" y2="38"/>'+
+    '<line class="arm l" x1="20" y1="22" x2="9" y2="3"/><line class="arm r" x1="20" y1="22" x2="31" y2="3"/></g>'+
+    '<line class="leg a" x1="20" y1="38" x2="20" y2="57"/><line class="leg b" x1="20" y1="38" x2="20" y2="57"/></svg>';
+  const tail=document.createElement("i");tail.className="tail";tail.setAttribute("aria-hidden","true");tail.style.opacity="0";
+  b.append(tail,guy);
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const go=async()=>{
+    const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);
+    const h=em*.46,w=h*40/60,feet=qr.bottom-br.top+em*.1,top=feet-h;
+    const ex=qr.right-br.left-qr.width*.36,ey=qr.bottom-br.top-em*.3;
+    const stopX=ex+em*.1,startX=br.width+em*.35,speed=em*2.8;
+    guy.style.width=w+"px";guy.style.height=h+"px";
+    const at=(x,flip)=>"translate("+x+"px,"+top+"px)"+(flip?" scaleX(-1)":"");
+    guy.classList.add("walking");
+    const inDur=(startX-stopX)/speed*1000;
+    await guy.animate([{transform:at(startX,1),opacity:0},{transform:at(startX-em*.3,1),opacity:1,offset:.08},{transform:at(stopX,1),opacity:1}],{duration:inDur,easing:"linear",fill:"forwards"}).finished;
+    guy.classList.remove("walking");
+    await wait(180);
+    // lift the tail off his hands and set it on the O
+    guy.classList.add("dropped");tail.style.opacity="1";
+    const hx=stopX+w/2-em*.04,hy=top-em*.12;
+    await tail.animate([{transform:"translate("+hx+"px,"+hy+"px) rotate(90deg)"},{transform:"translate("+((hx+ex)/2)+"px,"+(hy-em*.25)+"px) rotate(10deg)",offset:.5},{transform:"translate("+ex+"px,"+ey+"px) rotate(-42deg)"}],{duration:620,easing:"cubic-bezier(.3,.7,.2,1)",fill:"forwards"}).finished;
+    tail.style.transform="translate("+ex+"px,"+ey+"px) rotate(-42deg)";
+    b.classList.add("flash");
+    guy.animate([{transform:at(stopX,1)},{transform:"translate("+stopX+"px,"+(top-em*.12)+"px) scaleX(-1)"},{transform:at(stopX,1)}],{duration:380,easing:"ease-out"});
+    guy.classList.add("wave");await wait(1000);guy.classList.remove("wave");
+    guy.classList.add("walking");
+    await guy.animate([{transform:at(stopX,0),opacity:1},{transform:at(startX-em*.3,0),opacity:1,offset:.9},{transform:at(startX,0),opacity:0}],{duration:inDur,easing:"linear",fill:"forwards"}).finished;
+    guy.remove();
+    // keep the tail glued to the O on resize
+    addEventListener("resize",()=>{const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);tail.style.transform="translate("+(qr.right-br.left-qr.width*.36)+"px,"+(qr.bottom-br.top-em*.3)+"px) rotate(-42deg)"});
+  };
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,1300));
 });
 if(still)return;
 // cursor glow with easing
