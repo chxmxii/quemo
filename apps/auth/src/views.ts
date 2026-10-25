@@ -8,7 +8,7 @@ export function page(title: string, body: string, variant: "hero" | "app" = "app
 
 // ---------- sign in / sign up ----------
 
-const narrow = (inner: string) => `<section class="rise" style="max-width:420px;padding:12vh 0 8vh;display:grid;gap:28px">${inner}</section>`;
+const narrow = (inner: string) => `<section class="rise center" style="max-width:440px;margin:0 auto;padding:12vh 0 8vh;display:grid;gap:28px">${inner}</section>`;
 
 export function signInView(next: string | null, error?: string, tool?: ToolId): string {
   return page(
@@ -43,7 +43,7 @@ export function checkInboxView(email: string, next: string, notice?: string): st
     <label for="code">Code</label>
     <div class="beam" style="max-width:340px"><input id="code" class="otp" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="6" required autofocus></div>
     ${notice ? `<p class="small" style="color:var(--warn)">${e(notice)}</p>` : ""}
-    <button style="margin-top:4px;justify-self:start">Continue<i class="ph ph-arrow-right"></i></button>
+    <button style="margin-top:4px;justify-self:center">Continue<i class="ph ph-arrow-right"></i></button>
   </form>
   <form method="post" action="/auth/email">
     <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
@@ -64,7 +64,7 @@ export function confirmView(token: string, next: string): string {
 }
 
 export function messageView(title: string, message: string): string {
-  return page(title, narrow(`<div style="display:grid;gap:12px"><h1 class="reveal">${revealWords(`${title}.`)}</h1><p class="lede">${e(message)}</p></div><a class="btn ghost" href="/" style="justify-self:start">Back</a>`));
+  return page(title, narrow(`<div style="display:grid;gap:12px"><h1 class="reveal">${revealWords(`${title}.`)}</h1><p class="lede">${e(message)}</p></div><a class="btn ghost" href="/" style="justify-self:center">Back</a>`));
 }
 
 // ---------- OAuth consent ----------
@@ -83,7 +83,7 @@ export function consentView(details: ConsentDescription, tool: ToolId | undefine
     <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Publisher</span><span>${details.clientDomain ? e(details.clientDomain) : "Not verified"}</span></div>
   </div>
   ${details.redirectIsLoopback ? `<p class="small" style="color:var(--warn)">This sends access to an app on your computer. Only continue if you just started connecting from it.</p>` : ""}
-  <form method="post" style="display:flex;gap:10px">
+  <form method="post" style="display:flex;gap:10px;justify-content:center">
     <input type="hidden" name="handle" value="${e(handle)}">
     <button name="decision" value="approve">Allow</button>
     <button name="decision" value="deny" class="ghost">Deny</button>
@@ -144,16 +144,16 @@ export function dashboardView({ user, keys, connected, urls, flash }: DashboardD
     )
     .join("");
 
-  const body = `<section class="rise" style="padding:9vh 0 0;display:grid;gap:10px">
+  const body = `<section class="rise center" style="padding:9vh 0 0;display:grid;gap:10px">
   <h1 class="reveal">${revealWords(`${greeting(user.timezone)}${user.name ? `, ${user.name}` : ""}.`)}</h1>
   <p class="lede rise d2">Add a tool's link to your AI app, then just talk to it.</p>
 </section>
-${newKey ? `<section class="block"><h2>New API key</h2><p class="small muted">Shown once. Works with all four tools.</p>${copyBlock("newkey", newKey)}</section>` : ""}
+${newKey ? `<section class="block center"><h2>New API key</h2><p class="small muted">Shown once. Works with all four tools.</p>${copyBlock("newkey", newKey)}</section>` : ""}
 ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">${e(flash)}</p>` : ""}
 
-<section class="block"><h2>Tools</h2><div class="rows stagger">${tools}</div></section>
+<section class="block center"><h2>Tools</h2><div class="rows stagger">${tools}</div></section>
 
-<section class="block"><h2>Connect</h2>
+<section class="block center"><h2>Connect</h2>
   <div class="tabs">
     ${tabLabels.map(([id], i) => `<input type="radio" name="client" id="tab-${id}"${i === 0 ? " checked" : ""}>`).join("")}
     <div class="tablist" role="tablist">${tabLabels.map(([id, l]) => `<label for="tab-${id}">${l}</label>`).join("")}</div>
@@ -165,7 +165,7 @@ ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">
   </div>
 </section>
 
-<section class="block"><h2>Profile</h2>
+<section class="block center"><h2>Profile</h2>
   <form method="post" action="/dashboard/profile" style="display:grid;gap:14px">
     <div class="pgrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
       <div class="field"><label for="p-name">Name</label><input id="p-name" name="name" value="${e(user.name ?? "")}" maxlength="80"></div>
@@ -174,11 +174,11 @@ ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">
       <div class="field"><label for="p-units">Units</label><select id="p-units" name="units"><option value="metric"${user.units === "metric" ? " selected" : ""}>Metric</option><option value="imperial"${user.units === "imperial" ? " selected" : ""}>Imperial</option></select></div>
     </div>
     <datalist id="tzs"></datalist>
-    <button class="ghost" style="justify-self:start">Save</button>
+    <button class="ghost" style="justify-self:center">Save</button>
   </form>
 </section>
 
-<section class="block"><h2>API keys</h2>
+<section class="block center"><h2>API keys</h2>
   <p class="small muted">Only for apps that can't sign in with OAuth.</p>
   ${keys.length ? `<div class="rows">${keyRows}</div>` : ""}
   <form method="post" action="/dashboard/keys" style="display:flex;gap:10px;flex-wrap:wrap">
@@ -186,7 +186,7 @@ ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">
   </form>
 </section>
 
-<section class="block" style="padding-bottom:24px">
+<section class="block center" style="padding-bottom:24px">
   <details><summary class="small" style="cursor:pointer;color:var(--muted)">Delete account</summary>
   <form method="post" action="/dashboard/delete" style="display:grid;gap:10px;margin-top:14px;max-width:420px">
     <p class="small muted">Removes your account and all data in every tool.</p>

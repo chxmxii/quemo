@@ -154,6 +154,20 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .rows>*{padding:18px 0;border-top:1px solid var(--border)}
 .rows>*:last-child{border-bottom:1px solid var(--border)}
 section.block{display:grid;gap:14px;padding:40px 0 0}
+/* centered composition: text, labels and actions sit on the middle axis; rows and code stay readable */
+.center{text-align:center;justify-items:center}
+.center>*,.center form{width:100%}
+.center .lede{margin:0 auto}
+.center form{display:grid;justify-items:center}
+.center form>*:not(input):not(.beam):not(.inline):not(div){justify-self:center}
+.center .beam,.center .otp{margin:0 auto;width:100%}
+.center .otp{text-align:center;text-indent:.62em;padding-left:0}
+.center form[style*="display:flex"]{display:flex!important;justify-content:center}
+.center .rows{text-align:left}
+.center .tablist{margin:0 auto}
+.center .tabpanel{text-align:left}
+.center .tabpanel>p{text-align:center}
+.center details summary{list-style-position:inside}
 
 /* entry motion */
 .rise{animation:rise .6s var(--ease) both}
