@@ -43,15 +43,27 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
     radial-gradient(90% 60% at 88% 100%,rgba(139,92,246,.6),transparent 62%),
     radial-gradient(110% 70% at 50% -10%,rgba(37,99,235,.45),transparent 60%),
     linear-gradient(180deg,#05040c 0%,#0d0a24 38%,#2a0f45 70%,#5b1650 100%)}
-.sky i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;will-change:transform}
-.sky i:nth-child(1){width:60vmax;height:40vmax;left:-15vmax;bottom:-16vmax;background:#ec4899;animation:skyA 38s ease-in-out infinite alternate}
-.sky i:nth-child(2){width:60vmax;height:40vmax;right:-15vmax;bottom:-14vmax;background:#8b5cf6;animation:skyB 44s ease-in-out infinite alternate}
-.sky i:nth-child(3){width:46vmax;height:26vmax;left:50%;bottom:-12vmax;margin-left:-23vmax;background:#facc15;opacity:.38;animation:skyC 30s ease-in-out infinite alternate}
-.sky i:nth-child(4){width:70vmax;height:34vmax;left:50%;top:-22vmax;margin-left:-35vmax;background:#2563eb;opacity:.4;animation:skyC 52s ease-in-out infinite alternate-reverse}
-.sky.quiet{opacity:.65}
-@keyframes skyA{to{transform:translate(14vmax,-5vmax) scale(1.12)}}
-@keyframes skyB{to{transform:translate(-14vmax,-4vmax) scale(1.08)}}
-@keyframes skyC{to{transform:translate(0,-3vmax) scale(1.15)}}
+/* moving color layer: a big mesh of pink / purple / blue / yellow light that slowly swirls */
+.sky::before{content:"";position:absolute;left:-50%;top:-50%;width:200%;height:200%;opacity:.75;filter:blur(60px);
+  background:
+    radial-gradient(22% 18% at 30% 70%,#ec4899,transparent 70%),
+    radial-gradient(24% 20% at 70% 72%,#8b5cf6,transparent 70%),
+    radial-gradient(18% 14% at 50% 80%,#facc15,transparent 70%),
+    radial-gradient(26% 20% at 50% 35%,#2563eb,transparent 70%),
+    radial-gradient(20% 16% at 22% 40%,#8b5cf6,transparent 70%),
+    radial-gradient(20% 16% at 78% 42%,#ec4899,transparent 70%);
+  animation:swirl 26s linear infinite}
+@keyframes swirl{to{transform:rotate(360deg)}}
+.sky i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.6;will-change:transform,background-color}
+.sky i:nth-child(1){width:52vmax;height:38vmax;left:-12vmax;bottom:-12vmax;background:#ec4899;animation:skyA 14s ease-in-out infinite alternate,tint 18s linear infinite}
+.sky i:nth-child(2){width:52vmax;height:38vmax;right:-12vmax;bottom:-10vmax;background:#8b5cf6;animation:skyB 17s ease-in-out infinite alternate,tint 18s linear -6s infinite}
+.sky i:nth-child(3){width:40vmax;height:24vmax;left:50%;bottom:-8vmax;margin-left:-20vmax;background:#facc15;opacity:.45;animation:skyC 11s ease-in-out infinite alternate}
+.sky i:nth-child(4){width:60vmax;height:30vmax;left:50%;top:-16vmax;margin-left:-30vmax;background:#2563eb;opacity:.5;animation:skyB 20s ease-in-out infinite alternate-reverse,tint 18s linear -12s infinite}
+.sky.quiet{opacity:.7}
+@keyframes skyA{to{transform:translate(26vmax,-10vmax) scale(1.2)}}
+@keyframes skyB{to{transform:translate(-26vmax,-8vmax) scale(1.15)}}
+@keyframes skyC{to{transform:translate(0,-8vmax) scale(1.3)}}
+@keyframes tint{0%,100%{background-color:#ec4899}33%{background-color:#8b5cf6}66%{background-color:#2563eb}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -179,9 +191,7 @@ footer.foot a{color:var(--muted)}
 
 
 /* ---------- big centered brand ---------- */
-.brand{font:500 clamp(56px,13vw,132px)/1 var(--display);letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;margin:0;color:var(--text);
-  text-shadow:0 0 40px rgba(139,92,246,.45),0 0 90px rgba(59,130,246,.25);animation:brandGlow 5s ease-in-out infinite}
-@keyframes brandGlow{50%{text-shadow:0 0 56px rgba(139,92,246,.7),0 0 120px rgba(250,204,21,.18)}}
+.brand{font:500 clamp(56px,13vw,132px)/1 var(--display);letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;margin:0;color:var(--text);}
 .thin{font-family:var(--display);font-weight:200;letter-spacing:.01em;color:var(--text)}
 .tagline{font-size:clamp(20px,2.6vw,28px);line-height:1.3;margin:0}
 .lede.thin{font-family:var(--sans);font-weight:300;font-size:16px;opacity:.8}
@@ -236,7 +246,7 @@ footer.foot{text-align:center}
 .glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;z-index:0;pointer-events:none;
   background:radial-gradient(circle,var(--accent-soft) 0%,transparent 65%);opacity:0;transition:opacity .6s ease;will-change:transform}
 .glow.on{opacity:1}
-@media (hover:none){.glow{display:none}.sky i{animation:none}}
+@media (hover:none){.glow{display:none}.sky i,.sky::before{animation:none}}
 
 /* word-by-word blur reveal */
 .reveal .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(.25em);animation:wordIn .9s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 80ms)}
@@ -296,7 +306,7 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 /* copy feedback */
 [data-copy].done{color:var(--ok)}
 
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}.sky i{animation:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}.sky i,.sky::before{animation:none}}
 @media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
