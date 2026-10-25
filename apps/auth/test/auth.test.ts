@@ -44,7 +44,7 @@ describe("sign-up & sign-in with one email", () => {
     expect(html).toContain("quemo");
     expect(html).toContain('name="email"');
     expect(html).toContain("Get my code");
-    for (const tool of ["Budget", "Workout", "Health", "Food"]) expect(html).toContain(tool);
+    expect(html).toContain("Track your life from any chat.");
   });
 
   it("creates the account on first email, with the browser's time zone", async () => {

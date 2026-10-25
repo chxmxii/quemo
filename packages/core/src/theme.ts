@@ -14,10 +14,6 @@ export const escapeHtml = (value: unknown) =>
 const FONTS = "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap";
 const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
-const GRAIN = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .5 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>`,
-)}")`;
-
 export const THEME_CSS = `
 :root{
   color-scheme:light dark;
@@ -27,8 +23,8 @@ export const THEME_CSS = `
   --accent:#ff5a1f;--accent-ink:#c2410c;--accent-soft:rgba(255,90,31,.10);
   --ok:#15803d;--ok-soft:rgba(21,128,61,.10);--warn:#a16207;--warn-soft:rgba(161,98,7,.10);--bad:#b91c1c;--bad-soft:rgba(185,28,28,.08);
   --ink:#111114;--on-ink:#fafafa;
-  --shadow:0 1px 2px rgba(60,30,10,.04),0 24px 60px -24px rgba(90,45,15,.22);
-  --blob-a:#ff5a1f;--blob-b:#ffb547;--blob-c:#ff8fa3;--blob-o:.42;
+  --shadow:none;
+  --blob-a:#ff7a45;--blob-b:#ffc78a;--blob-c:#ffd9c7;--blob-o:.22;
   --sans:"Geist",ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
@@ -39,8 +35,8 @@ export const THEME_CSS = `
   --accent:#ff6a33;--accent-ink:#ff9466;--accent-soft:rgba(255,106,51,.12);
   --ok:#4ade80;--ok-soft:rgba(74,222,128,.10);--warn:#fbbf24;--warn-soft:rgba(251,191,36,.10);--bad:#f87171;--bad-soft:rgba(248,113,113,.10);
   --ink:#f2f2f4;--on-ink:#111114;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 30px 70px -30px rgba(0,0,0,.7);
-  --blob-a:#ff5a1f;--blob-b:#c2410c;--blob-c:#9f1239;--blob-o:.34;
+  --shadow:none;
+  --blob-a:#ff5a1f;--blob-b:#7c2d12;--blob-c:#431407;--blob-o:.16;
 }}
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%}
@@ -49,37 +45,37 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
 ::selection{background:var(--accent);color:#fff}
 
 /* ambient light: three blurred orbs drifting behind everything */
-.aurora{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(90px) saturate(130%);opacity:var(--blob-o)}
+.aurora{position:fixed;inset:-20vmax;z-index:0;pointer-events:none;filter:blur(120px);opacity:var(--blob-o)}
 .aurora i{position:absolute;border-radius:50%;display:block}
-.aurora i:nth-child(1){width:48vmax;height:48vmax;left:42%;top:4%;background:var(--blob-a);animation:driftA 26s var(--ease) infinite alternate}
-.aurora i:nth-child(2){width:40vmax;height:40vmax;left:62%;top:38%;background:var(--blob-b);animation:driftB 32s var(--ease) infinite alternate}
-.aurora i:nth-child(3){width:34vmax;height:34vmax;left:18%;top:46%;background:var(--blob-c);animation:driftC 38s var(--ease) infinite alternate}
-.aurora.quiet{opacity:calc(var(--blob-o) * .55)}
-@keyframes driftA{to{transform:translate(-12vmax,8vmax) scale(1.08)}}
-@keyframes driftB{to{transform:translate(-18vmax,-10vmax) scale(.92)}}
+.aurora i:nth-child(1){width:44vmax;height:30vmax;left:46%;top:2%;background:var(--blob-a);animation:driftA 40s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:36vmax;height:26vmax;left:30%;top:8%;background:var(--blob-b);animation:driftB 48s ease-in-out infinite alternate}
+.aurora i:nth-child(3){display:none}
+.aurora.quiet{opacity:calc(var(--blob-o) * .6)}
+@keyframes driftA{to{transform:translate(-6vmax,3vmax)}}
+@keyframes driftB{to{transform:translate(6vmax,2vmax)}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.07;background-image:${GRAIN};mix-blend-mode:overlay}
+.grain{display:none}
 
-.shell{position:relative;z-index:2;width:100%;max-width:1120px;margin:0 auto;padding:0 20px}
+.shell{position:relative;z-index:2;width:100%;max-width:760px;margin:0 auto;padding:0 20px}
+.wide .shell,.wide footer.foot{max-width:1000px}
 nav.top{display:flex;align-items:center;justify-content:space-between;height:68px}
-.wordmark{display:inline-flex;align-items:center;gap:10px;font-weight:600;font-size:18px;letter-spacing:-.03em;color:var(--text)}
+.wordmark{display:inline-flex;align-items:center;gap:9px;font-weight:500;font-size:16px;letter-spacing:-.02em;color:var(--text)}
 .wordmark:hover{text-decoration:none}
-.mark{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:#fff;font:600 15px/1 var(--sans);
-  background:radial-gradient(120% 120% at 20% 10%,#ffb547 0%,#ff5a1f 55%,#c2410c 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 6px 16px -6px rgba(255,90,31,.6)}
+.mark{width:10px;height:10px;border-radius:50%;background:var(--accent)}
 
-h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.035em;color:var(--text)}
-h1{font-size:clamp(40px,5.6vw,64px);line-height:1.02}
-h2{font-size:clamp(24px,2.6vw,30px);line-height:1.15;letter-spacing:-.03em}
-h3{font-size:17px;line-height:1.3;letter-spacing:-.02em}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.03em;color:var(--text)}
+h1{font-size:clamp(32px,4.2vw,44px);line-height:1.1}
+h2{font-size:15px;line-height:1.4;letter-spacing:-.01em}
+h3{font-size:15px;line-height:1.4;letter-spacing:-.01em}
 .accent{color:var(--accent-ink)}
-.lede{font-size:18px;line-height:1.55;color:var(--muted);max-width:44ch;margin:0}
+.lede{font-size:16px;line-height:1.6;color:var(--muted);max-width:40ch;margin:0}
 .muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:13.5px}.mono{font-family:var(--mono);font-size:13px}
 p{margin:0}
 
 /* frosted glass */
-.glass{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:inset 0 1px 0 var(--hi),var(--shadow);
-  -webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%)}
-.glass.pad{padding:28px}
+.glass{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.glass.pad{padding:24px}
 .spot{--x:50%;--y:0%;overflow:hidden}
 .spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
   background:radial-gradient(420px circle at var(--x) var(--y),var(--accent-soft),transparent 60%)}
@@ -90,7 +86,7 @@ p{margin:0}
 .field{display:grid;gap:7px}
 label,.label{font-size:13px;font-weight:500;color:var(--text)}
 .hint{font-size:12.5px;color:var(--muted)}
-input,select{font:inherit;font-size:15px;color:var(--text);background:var(--surface-2);border:1px solid var(--border-2);border-radius:12px;padding:12px 14px;width:100%;outline:none;
+input,select{font:inherit;font-size:15px;color:var(--text);background:var(--solid);border:1px solid var(--border-2);border-radius:12px;padding:12px 14px;width:100%;outline:none;
   transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
 input::placeholder{color:var(--faint)}
 input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
@@ -104,11 +100,11 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--a
 .btn,button{font:inherit;font-size:14.5px;font-weight:550;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
   border:0;border-radius:999px;padding:11px 20px;color:var(--on-ink);background:var(--ink);text-decoration:none;
   transition:transform .15s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease)}
-.btn:hover,button:hover{text-decoration:none;box-shadow:0 8px 24px -10px rgba(255,90,31,.55)}
+.btn:hover,button:hover{text-decoration:none;opacity:.88}
 .btn:active,button:active{transform:scale(.98)}
 .btn:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.btn.ghost,button.ghost{background:var(--surface-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border-2)}
-.btn.ghost:hover,button.ghost:hover{box-shadow:inset 0 0 0 1px var(--border-2),0 6px 20px -12px rgba(0,0,0,.3)}
+.btn.ghost,button.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--border-2)}
+.btn.ghost:hover,button.ghost:hover{opacity:1;background:var(--solid)}
 button.danger{background:var(--bad);color:#fff}
 .btn.sm,button.sm{padding:7px 13px;font-size:13px}
 .icon-btn{padding:8px;border-radius:10px}
@@ -143,7 +139,7 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}
 .kpi{padding:18px;display:grid;gap:4px}
 .kpi span{font-size:12.5px;color:var(--muted)}
-.kpi b{font-size:28px;font-weight:600;letter-spacing:-.035em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi b{font-size:26px;font-weight:500;letter-spacing:-.035em;line-height:1.1;font-variant-numeric:tabular-nums}
 .kpi small{font-size:12.5px;color:var(--muted)}
 .kpi.good b{color:var(--ok)}.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}
 .bars{display:grid;gap:12px}
@@ -153,14 +149,20 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .bar.good .fill{background:var(--ok)}.bar.warn .fill{background:var(--warn)}.bar.bad .fill{background:var(--bad)}
 .bar .val{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
 
+/* hairline lists */
+.rows{display:grid}
+.rows>*{padding:18px 0;border-top:1px solid var(--border)}
+.rows>*:last-child{border-bottom:1px solid var(--border)}
+section.block{display:grid;gap:14px;padding:40px 0 0}
+
 /* entry motion */
-.rise{animation:rise .8s var(--ease) both}
+.rise{animation:rise .6s var(--ease) both}
 .rise.d1{animation-delay:.06s}.rise.d2{animation-delay:.14s}.rise.d3{animation-delay:.22s}.rise.d4{animation-delay:.3s}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}}
-.float{animation:float 9s ease-in-out infinite}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}
+.float{}
 @keyframes float{50%{transform:translateY(-6px)}}
 
-footer.foot{position:relative;z-index:2;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1120px;margin:0 auto;padding:40px 20px 36px;color:var(--faint);font-size:13px}
+footer.foot{position:relative;z-index:2;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:760px;margin:0 auto;padding:40px 20px 36px;color:var(--faint);font-size:13px}
 footer.foot a{color:var(--muted)}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -192,11 +194,11 @@ export function layout({ title, body, variant = "app", head = "", bare = false }
 <link rel="stylesheet" href="${FONTS}">
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#ffb547"/><stop offset=".55" stop-color="#ff5a1f"/><stop offset="1" stop-color="#c2410c"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
-<style>${THEME_CSS}</style>${head}</head><body>
-<div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i></div><div class="grain" aria-hidden="true"></div>
-${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="btn ghost sm" href="https://github.com/chxmxii/quemo" rel="noopener"><i class="ph ph-github-logo"></i>GitHub</a></nav></div>`}
+<style>${THEME_CSS}</style>${head}</head><body${variant === "report" ? ' class="wide"' : ""}>
+<div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i></div>
+${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
-<footer class="foot noprint"><span>quemo. Track your life from any AI chat.</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source on GitHub</a></footer>
+<footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
 <script>
 document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';setTimeout(()=>b.innerHTML=o,1400)})});
 document.querySelectorAll(".spot").forEach(el=>el.addEventListener("pointermove",e=>{const r=el.getBoundingClientRect();el.style.setProperty("--x",(e.clientX-r.left)+"px");el.style.setProperty("--y",(e.clientY-r.top)+"px")}));
