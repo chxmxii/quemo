@@ -13,15 +13,16 @@ export async function sendSignInEmail(env: Env, to: string, link: string, code: 
     body: JSON.stringify({
       from: env.EMAIL_FROM,
       to: [to],
-      subject: `${code} — your Quemo access code`,
-      text: `Welcome to Quemo City.\n\nYour access code: ${code}\n\nOr open this link: ${link}\n\nIt expires in 15 minutes. Didn't ask for it? Ignore this email.`,
-      html: `<div style="background:#07030f;padding:32px 16px;font-family:Arial,sans-serif">
-<div style="max-width:480px;margin:0 auto;background:#160a2b;border:1px solid #3b1f5e;padding:28px;color:#f7f0ff">
-<div style="font:bold 40px Impact,Arial Narrow,sans-serif;letter-spacing:2px;color:#ff3d8b;font-style:italic">QUEMO</div>
-<p style="color:#33f0ff;letter-spacing:4px;font-size:11px;text-transform:uppercase;margin:4px 0 24px">Access code</p>
-<div style="font:bold 36px 'Courier New',monospace;letter-spacing:10px;background:#07030f;padding:16px;text-align:center;color:#ffd166">${escapeHtml(code)}</div>
-<p style="margin:24px 0"><a href="${escapeHtml(link)}" style="display:inline-block;background:#ff3d8b;color:#1a0420;padding:14px 22px;text-decoration:none;font-weight:bold;letter-spacing:2px;text-transform:uppercase">Enter the city</a></p>
-<p style="color:#b9a7d6;font-size:12px">Expires in 15 minutes. Didn't ask for it? Ignore this email.</p></div></div>`,
+      subject: `${code} is your quemo code`,
+      text: `Your quemo sign-in code: ${code}\n\nOr open this link: ${link}\n\nIt expires in 15 minutes. If you didn't ask for it, you can ignore this email.`,
+      html: `<div style="background:#f6f6f7;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111114">
+<div style="max-width:440px;margin:0 auto;background:#ffffff;border:1px solid #ececef;border-radius:20px;padding:32px">
+<div style="display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border-radius:10px;background:#ff5a1f;color:#fff;font-weight:600;font-size:17px">q</div>
+<h1 style="font-size:22px;letter-spacing:-.02em;margin:20px 0 6px;font-weight:600">Your sign-in code</h1>
+<p style="margin:0 0 20px;color:#5d5d68;font-size:15px">Enter it on the quemo page you just opened.</p>
+<div style="font:600 32px/1 'SFMono-Regular',Menlo,Consolas,monospace;letter-spacing:10px;background:#f6f6f7;border-radius:12px;padding:18px;text-align:center">${escapeHtml(code)}</div>
+<p style="margin:24px 0 0"><a href="${escapeHtml(link)}" style="display:inline-block;background:#111114;color:#fafafa;padding:12px 22px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px">Or sign in with one click</a></p>
+<p style="margin:24px 0 0;color:#8b8b96;font-size:12.5px">Expires in 15 minutes. If you didn't ask for it, you can ignore this email.</p></div></div>`,
     }),
   });
   if (!res.ok) throw new Error(`Resend failed (${res.status}): ${await res.text()}`);

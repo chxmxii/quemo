@@ -26,8 +26,8 @@ describe("report rendering", () => {
     expect(md).toContain("- Things went well.");
     expect(md).toContain("| a\\|b | 1 |"); // pipes escaped
     expect(md).toContain("|---|---:|"); // numeric column right-aligned
-    expect(md).toContain("`████████░░░░░░░░` **Half** — 50%");
-    expect(md).toContain("`████████████████` **Over** — 200% ⚠"); // clamped
+    expect(md).toContain("`████████░░░░░░░░` **Half**, 50%");
+    expect(md).toContain("`████████████████` **Over**, 200% ⚠"); // clamped
     expect(md).toContain("_No data here._");
     expect(md).toContain("> Not advice.");
     expect(md).toContain("https://x/reports/1");

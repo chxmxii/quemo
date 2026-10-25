@@ -420,8 +420,8 @@ export function vitalFlag(v: VitalRow): VitalFlag | null {
   if (!reason) return null;
   const what = `${vitalLabel(v)} ${vitalValue(v)} on ${v.measured_at}`;
   return urgent
-    ? { level: "urgent", message: `${what} ${reason} — consider contacting a healthcare professional promptly.` }
-    : { level: "attention", message: `${what} ${reason} — worth discussing with your doctor.` };
+    ? { level: "urgent", message: `${what} ${reason}, consider contacting a healthcare professional promptly.` }
+    : { level: "attention", message: `${what} ${reason}, worth discussing with your doctor.` };
 }
 
 export function trendOf(values: number[], tolerance = 0.03): "rising" | "falling" | "stable" | "not enough data" {
@@ -625,12 +625,12 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     instructions:
       "Quemo Health: medication & health follow-up tracker. Medication schedules are local wall-clock times (HH:MM) in the user's time zone. " +
       "Add medicines with add_medication (schedule times + optional weekdays, or as_needed; stock and units_per_dose enable refill alerts). " +
-      "When the user says they took their pills ('took my meds', 'took all my morning meds') call log_doses — with part_of_day for 'morning/evening…' — so each medication's due slot is marked; " +
+      "When the user says they took their pills ('took my meds', 'took all my morning meds') call log_doses, with part_of_day for 'morning/evening…', so each medication's due slot is marked; " +
       "for a single medicine use log_dose (it picks the nearest due slot). Taking a dose lowers the stock; refill_medication adds stock. " +
       "todays_doses shows today's schedule; log_vital records blood pressure, glucose, weight, temperature, SpO2 and more; log_symptom records how they feel; " +
       "appointments go in add_appointment (keep questions_to_ask there) and complete_appointment afterwards. " +
       "Never diagnose or change treatment: report numbers neutrally, and when a reading is flagged suggest discussing it with their doctor, or contacting a healthcare professional promptly for urgent flags. " +
-      "Do not advise starting, stopping or changing doses — that is for their prescriber.",
+      "Do not advise starting, stopping or changing doses, that is for their prescriber.",
   });
 
   async function findMed(ref: string): Promise<MedRow | null> {
@@ -686,7 +686,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
   const stockNote = (m: MedRow) => {
     if (m.stock === null) return "";
     const d = daysOfSupply(m);
-    return ` ${m.stock} left${d !== null ? ` (~${d} days)` : ""}${refillNeeded(m) ? " — time to refill" : ""}.`;
+    return ` ${m.stock} left${d !== null ? ` (~${d} days)` : ""}${refillNeeded(m) ? ", time to refill" : ""}.`;
   };
 
   // ---------- medications ----------
@@ -727,7 +727,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       const start = a.start_date ?? today();
       if (a.end_date && a.end_date < start) return fail("end_date is before start_date.");
       if (await db.prepare("SELECT 1 FROM medications WHERE user_id = ? AND name = ?").bind(uid, a.name).first())
-        return fail(`${a.name} is already tracked — use update_medication to change it.`);
+        return fail(`${a.name} is already tracked, use update_medication to change it.`);
       const medId = id();
       await db
         .prepare(
@@ -908,7 +908,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     async (a) => {
       const m = await findMed(a.medication);
       if (!m) return fail(`Medication ${a.medication} not found`);
-      if (!m.active) return fail(`${m.name} is stopped — resume it with update_medication (active=true) first.`);
+      if (!m.active) return fail(`${m.name} is stopped, resume it with update_medication (active=true) first.`);
       const n = now();
       const actualStr = a.taken_at
         ? normStamp(a.taken_at)
@@ -916,7 +916,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
           ? `${a.date} ${a.scheduled_time}`
           : `${n.date} ${n.time}`;
       const actual = { date: actualStr.slice(0, 10), time: actualStr.slice(11) };
-      if (stamp(actual.date, actual.time) > stamp(n.date, n.time) + 5) return fail("That time is in the future — log doses once they've happened.");
+      if (stamp(actual.date, actual.time) > stamp(n.date, n.time) + 5) return fail("That time is in the future, log doses once they've happened.");
 
       let slot: { date: string; time: string } | null = null;
       if (!m.as_needed) {
@@ -945,7 +945,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
         "Bulk-log doses, e.g. 'took all my morning meds' (part_of_day=morning) or 'took my pills' (every medication's currently due slot). Optionally limit to named medications.",
       inputSchema: z.object({
         medications: z.array(medRef).max(30).optional().describe("Only these medications (default: every active scheduled medication)"),
-        part_of_day: z.enum(PARTS_OF_DAY).optional().describe("morning 04–12, afternoon 12–17, evening 17–22, night 22–04"),
+        part_of_day: z.enum(PARTS_OF_DAY).optional().describe("morning 04-12, afternoon 12-17, evening 17-22, night 22-04"),
         status: z.enum(DOSE_STATUSES).default("taken"),
         date: zDate.optional().describe("Day of the slots (default today)"),
         taken_at: zDateTime.optional().describe("When they were taken, local 'YYYY-MM-DD HH:MM' (default now)"),
@@ -1139,7 +1139,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
         value = a.value;
       }
       if (a.type === "other" && !a.name) return fail("Give a name for an 'other' measurement (e.g. 'Peak flow').");
-      if (a.type === "spo2" && value > 100) return fail("SpO2 is a percentage (0–100).");
+      if (a.type === "spo2" && value > 100) return fail("SpO2 is a percentage (0-100).");
       if (a.type === "sleep_hours" && value > 24) return fail("Sleep hours must be 24 or less.");
       const unit = a.unit ? normUnit(a.unit) : defaultUnit(a.type, user.units);
       const n = now();
@@ -1217,7 +1217,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     "log_symptom",
     {
       title: "Log symptom",
-      description: "Record a symptom with severity 1–10, body area, when it started, duration, possible triggers and notes.",
+      description: "Record a symptom with severity 1-10, body area, when it started, duration, possible triggers and notes.",
       inputSchema: z.object({
         name: text(80).describe("e.g. Headache, Nausea, Back pain"),
         severity: z.number().int().min(1).max(10).describe("1 = barely noticeable, 10 = worst imaginable"),
@@ -1252,7 +1252,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       const recent = (await loadSymptoms(db, uid, addDays(n.date, -13), n.date, row.name)).length;
       return ok(
         { ...row, times_last_14_days: recent },
-        `Logged ${row.name} (severity ${row.severity}/10) at ${at}.${recent >= 3 ? ` That's ${recent} times in 14 days — worth mentioning to your doctor.` : ""}`,
+        `Logged ${row.name} (severity ${row.severity}/10) at ${at}.${recent >= 3 ? ` That's ${recent} times in 14 days, worth mentioning to your doctor.` : ""}`,
       );
     },
   );
@@ -1435,7 +1435,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     },
     async () => {
       const { exists, ...p } = await loadProfile(db, uid);
-      return ok(p, exists ? undefined : "No health profile yet — update_health_profile adds conditions, allergies and contacts.");
+      return ok(p, exists ? undefined : "No health profile yet, update_health_profile adds conditions, allergies and contacts.");
     },
   );
 
@@ -1532,7 +1532,7 @@ export async function followUp(db: D1Database, uid: string, n: LocalNow) {
 
   const nudges: string[] = [];
   for (const s of dueNow)
-    nudges.push(s.status === "overdue" ? `${s.medication} (${s.time}) is overdue — did you take it?` : `${s.medication}${s.dosage ? ` ${s.dosage}` : ""} is due at ${s.time}.`);
+    nudges.push(s.status === "overdue" ? `${s.medication} (${s.time}) is overdue, did you take it?` : `${s.medication}${s.dosage ? ` ${s.dosage}` : ""} is due at ${s.time}.`);
   if (missed.length) {
     const counts = new Map<string, number>();
     for (const s of missed) counts.set(s.medication, (counts.get(s.medication) ?? 0) + 1);
@@ -1543,15 +1543,15 @@ export async function followUp(db: D1Database, uid: string, n: LocalNow) {
     const d = daysOfSupply(m);
     nudges.push(
       m.stock! < m.units_per_dose
-        ? `${m.name} is out of stock — time to refill${m.pharmacy ? ` at ${m.pharmacy}` : ""}.`
-        : `${m.name}: about ${d} day${d === 1 ? "" : "s"} left (${m.stock} units) — time to refill${m.pharmacy ? ` at ${m.pharmacy}` : ""}.`,
+        ? `${m.name} is out of stock, time to refill${m.pharmacy ? ` at ${m.pharmacy}` : ""}.`
+        : `${m.name}: about ${d} day${d === 1 ? "" : "s"} left (${m.stock} units), time to refill${m.pharmacy ? ` at ${m.pharmacy}` : ""}.`,
     );
   }
   for (const m of ending) nudges.push(`${m.name} course ends ${m.end_date === t ? "today" : `on ${m.end_date}`}.`);
   for (const a of upcoming) {
     const qs: string[] = JSON.parse(a.questions);
     nudges.push(
-      `Appointment with ${a.doctor} on ${a.scheduled_at}${qs.length ? ` — ${qs.length} question${qs.length === 1 ? "" : "s"} ready to ask.` : " — any questions you want to note for it?"}`,
+      `Appointment with ${a.doctor} on ${a.scheduled_at}${qs.length ? `, ${qs.length} question${qs.length === 1 ? "" : "s"} ready to ask.` : ", any questions you want to note for it?"}`,
     );
   }
   for (const a of needsOutcome) nudges.push(`How did the appointment with ${a.doctor} on ${a.scheduled_at.slice(0, 10)} go? complete_appointment can record the outcome.`);
@@ -1559,11 +1559,11 @@ export async function followUp(db: D1Database, uid: string, n: LocalNow) {
   for (const s of symptoms)
     nudges.push(
       s.trend === "worsening"
-        ? `${s.symptom} seems to be getting worse (avg severity ${s.avg_severity}/10) — worth discussing with your doctor.`
-        : `${s.symptom} logged ${s.count} times in the last 14 days — worth mentioning to your doctor.`,
+        ? `${s.symptom} seems to be getting worse (avg severity ${s.avg_severity}/10), worth discussing with your doctor.`
+        : `${s.symptom} logged ${s.count} times in the last 14 days, worth mentioning to your doctor.`,
     );
-  if (adh.overall_percent !== null && adh.overall_percent < 80) nudges.push(`Adherence over the last 7 days is ${adh.overall_percent}% — reminders or a pill organizer might help.`);
-  if (!week.meds.length) nudges.push("No medications tracked yet — add them with add_medication (or log a vital or symptom).");
+  if (adh.overall_percent !== null && adh.overall_percent < 80) nudges.push(`Adherence over the last 7 days is ${adh.overall_percent}%, reminders or a pill organizer might help.`);
+  if (!week.meds.length) nudges.push("No medications tracked yet, add them with add_medication (or log a vital or symptom).");
   if (!profile.exists) nudges.push("Add your conditions and allergies with update_health_profile so reports for your doctor are complete.");
 
   return {

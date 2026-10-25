@@ -85,7 +85,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     name: "quemo-budget",
     instructions:
       "Quemo Budget: personal finance tracker. Amounts are plain positive numbers in the user's currency; the `kind` says whether money comes in or goes out. " +
-      "Log spending with add_transaction (categories, accounts and tags are created on the fly — reuse existing names from list_categories when they fit). " +
+      "Log spending with add_transaction (categories, accounts and tags are created on the fly, reuse existing names from list_categories when they fit). " +
       "Use add_transactions for several at once (e.g. a receipt or bank statement). Bills/subscriptions/salary go in add_recurring; mark_recurring_paid logs them. " +
       "budget_status answers 'how am I doing this month', follow_up gives a check-in, generate_report a full organized report.",
   });
@@ -627,9 +627,9 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
         else if (c.percent_used !== null && c.percent_used >= 80) nudges.push(`${c.category} has used ${c.percent_used}% of its budget.`);
       }
       for (const b of bills) nudges.push(b.next_due < t ? `${b.name} is overdue since ${b.next_due}.` : `${b.name} (${money(b.amount_cents, cur())}) is due ${b.next_due === t ? "today" : `on ${b.next_due}`}.`);
-      if (!last?.d) nudges.push("No transactions yet — log your first expense or add your accounts.");
-      else if (daysBetween(last.d, t) >= 3) nudges.push(`Nothing logged for ${daysBetween(last.d, t)} days — anything to add?`);
-      if (!status.categories.some((c) => c.budget !== null)) nudges.push("No budgets set yet — try set_budget for your top categories.");
+      if (!last?.d) nudges.push("No transactions yet, log your first expense or add your accounts.");
+      else if (daysBetween(last.d, t) >= 3) nudges.push(`Nothing logged for ${daysBetween(last.d, t)} days, anything to add?`);
+      if (!status.categories.some((c) => c.budget !== null)) nudges.push("No budgets set yet, try set_budget for your top categories.");
       for (const goal of g) if (goal.on_track === false) nudges.push(`Savings goal ${goal.name} needs ${money(toCents(goal.monthly_needed ?? 0), cur())}/month to hit ${goal.deadline}.`);
       return ok({
         today: t,

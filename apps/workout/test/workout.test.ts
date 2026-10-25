@@ -221,13 +221,13 @@ describe("personal records", () => {
 
     // heavier, but fewer reps: weight PR only (e1RM 115.5 < 116.7)
     const second = await mcp.call("log_workout", { date: daysAgo(2), exercises: [bench([{ reps: 3, weight: 105 }, { reps: 12, weight: 140, is_warmup: true }])] });
-    expect(second.new_prs).toEqual(["Bench Press: heaviest weight 105 kg (3 reps) — previous 100 kg"]);
+    expect(second.new_prs).toEqual(["Bench Press: heaviest weight 105 kg (3 reps), previous 100 kg"]);
 
     const third = await mcp.call("log_workout", { date: daysAgo(1), exercises: [bench([{ reps: 8, weight: 100 }])] });
     expect(third.new_prs).toHaveLength(3);
-    expect(third.new_prs.join("\n")).toMatch(/best estimated 1RM 126\.7 kg \(8 reps\) — previous 116\.7 kg/);
-    expect(third.new_prs.join("\n")).toMatch(/most reps at 100 kg 8 reps — previous 5 reps/);
-    expect(third.new_prs.join("\n")).toMatch(/best set volume 800 kg — previous 500 kg/);
+    expect(third.new_prs.join("\n")).toMatch(/best estimated 1RM 126\.7 kg \(8 reps\), previous 116\.7 kg/);
+    expect(third.new_prs.join("\n")).toMatch(/most reps at 100 kg 8 reps, previous 5 reps/);
+    expect(third.new_prs.join("\n")).toMatch(/best set volume 800 kg, previous 500 kg/);
     expect(await mcp.text("log_workout", { exercises: [bench([{ reps: 1, weight: 110 }])] })).toMatch(/New PR! Bench Press: heaviest weight 110 kg/);
 
     const pr = await mcp.call("personal_records");
@@ -249,9 +249,9 @@ describe("personal records", () => {
     const { mcp } = await newUser();
     await mcp.call("log_workout", { date: daysAgo(5), exercises: [{ exercise: "Running", sets: [{ distance: 5, duration_sec: 1500 }] }] });
     const faster = await mcp.call("log_workout", { date: daysAgo(3), exercises: [{ exercise: "Running", sets: [{ distance: 5, duration_sec: 1440 }] }] });
-    expect(faster.new_prs).toEqual(["Running: fastest pace 4:48 /km — previous 5:00 /km"]);
+    expect(faster.new_prs).toEqual(["Running: fastest pace 4:48 /km, previous 5:00 /km"]);
     const longer = await mcp.call("log_workout", { exercises: [{ exercise: "Running", sets: [{ distance: 10, duration_sec: 3300 }] }] });
-    expect(longer.new_prs).toEqual(expect.arrayContaining(["Running: longest distance 10 km — previous 5 km", "Running: longest duration 55:00 — previous 25:00"]));
+    expect(longer.new_prs).toEqual(expect.arrayContaining(["Running: longest distance 10 km, previous 5 km", "Running: longest duration 55:00, previous 25:00"]));
     const rec = (await mcp.call("personal_records", { exercise: "Running" })).records[0];
     expect(rec).toMatchObject({ longest_distance: { distance: 10 }, fastest_pace: { pace: "4:48 /km" } });
   });
@@ -477,7 +477,7 @@ describe("follow-up", () => {
     expect(f.streak.days).toBe(2);
     const thisWeek = [0, 1].filter((d) => daysAgo(d) >= startOfWeek(today())).length;
     expect(f.this_week).toMatchObject({ workouts: thisWeek, goal: 5, minutes: thisWeek * 30 });
-    expect(f.nudges.join(" ")).toMatch(new RegExp(`${thisWeek} of 5 workouts done this week — ${5 - thisWeek} to go`));
+    expect(f.nudges.join(" ")).toMatch(new RegExp(`${thisWeek} of 5 workouts done this week, ${5 - thisWeek} to go`));
   });
 });
 

@@ -334,7 +334,7 @@ export function describePr(e: PrEvent, u: Units): string {
   const at = e.kind === "most_reps_at_weight" ? (e.weight ? ` at ${fmtWeight(e.weight, u)}` : " (bodyweight)") : "";
   const reps = (e.kind === "heaviest_weight" || e.kind === "best_e1rm") && e.reps ? ` (${e.reps} rep${e.reps === 1 ? "" : "s"})` : "";
   const name = PR_LABELS[e.kind].charAt(0).toLowerCase() + PR_LABELS[e.kind].slice(1);
-  return `${e.exercise}: ${name}${at} ${v}${reps} — previous ${p}`;
+  return `${e.exercise}: ${name}${at} ${v}${reps}, previous ${p}`;
 }
 
 export function prValue(kind: PrKind, v: number, u: Units, _weight?: number): string {

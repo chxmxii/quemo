@@ -22,7 +22,7 @@ import {
 
 export const adherenceTone = (pct: number | null): Tone => (pct === null ? "neutral" : pct >= 90 ? "good" : pct >= 75 ? "warn" : "bad");
 
-const TREND_ARROW: Record<string, string> = { rising: "↑ rising", falling: "↓ falling", stable: "→ stable", "not enough data": "—" };
+const TREND_ARROW: Record<string, string> = { rising: "↑ rising", falling: "↓ falling", stable: "→ stable", "not enough data": "-" };
 
 export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Promise<Report> {
   const { env, user } = ctx;
@@ -56,7 +56,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     highlights.push(`Overall medication adherence was ${adh.overall_percent}% (${adh.taken} of ${adh.scheduled} scheduled doses taken).`);
   const worst = [...adh.by_medication].filter((a) => a.percent !== null && a.percent < 90).sort((a, b) => a.percent! - b.percent!)[0];
   if (worst) highlights.push(`Lowest adherence: ${worst.medication} at ${worst.percent}% (${worst.missed + worst.skipped} doses not taken).`);
-  if (flagged.length) highlights.push(`${flagged.length} reading${flagged.length === 1 ? " was" : "s were"} outside the usual range — see Flagged readings.`);
+  if (flagged.length) highlights.push(`${flagged.length} reading${flagged.length === 1 ? " was" : "s were"} outside the usual range, see Flagged readings.`);
   if (symSummary[0]) highlights.push(`Most frequent symptom: ${symSummary[0].symptom} (${symSummary[0].count}×, average severity ${symSummary[0].avg_severity}/10, ${symSummary[0].trend}).`);
   for (const s of symSummary.filter((x) => x.trend === "worsening").slice(0, 3)) if (s !== symSummary[0]) highlights.push(`${s.symptom} appears to be worsening.`);
   if (upcoming[0]) highlights.push(`Next appointment: ${upcoming[0].doctor}${upcoming[0].specialty ? ` (${upcoming[0].specialty})` : ""} on ${upcoming[0].scheduled_at}.`);
@@ -119,7 +119,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
         .slice(0, 60)
         .map((s) => [s.date, s.time, s.medication, s.logged ? s.status : "not logged", s.note]),
     },
-    empty: "No missed doses — every scheduled dose was taken.",
+    empty: "No missed doses, every scheduled dose was taken.",
   });
 
   const asNeeded = new Map<string, { count: number; last: string }>();
@@ -149,7 +149,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
 
   sections.push({
     title: "Flagged readings",
-    text: flagged.length ? "Readings outside commonly used reference ranges — worth discussing with your doctor. These are not diagnoses." : undefined,
+    text: flagged.length ? "Readings outside commonly used reference ranges, worth discussing with your doctor. These are not diagnoses." : undefined,
     table: {
       columns: ["When", "Measurement", "Value", "Context", "Note"],
       rows: [...flagged].reverse().slice(0, 40).map(({ v, flag }) => [v.measured_at, vitalLabel(v), `${vitalValue(v)}${flag!.level === "urgent" ? " ⚠" : ""}`, v.context, v.note]),
@@ -189,7 +189,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     title: "Appointments in this period",
     table: {
       columns: ["Date", "Doctor", "Specialty", "Reason", "Status", "Outcome / notes"],
-      rows: apptsInPeriod.map((a) => [a.scheduled_at, a.doctor, a.specialty, a.reason, a.status, [a.outcome, a.notes].filter(Boolean).join(" — ")]),
+      rows: apptsInPeriod.map((a) => [a.scheduled_at, a.doctor, a.specialty, a.reason, a.status, [a.outcome, a.notes].filter(Boolean).join(", ")]),
     },
     empty: "No appointments in this period.",
   });
@@ -223,7 +223,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     subtitle: user.name ?? user.email,
     period: { from: range.from, to: range.to, label: range.label },
     kpis: [
-      { label: "Adherence", value: adh.overall_percent === null ? "—" : `${adh.overall_percent}%`, detail: `${adh.scheduled} scheduled doses`, tone: adherenceTone(adh.overall_percent) },
+      { label: "Adherence", value: adh.overall_percent === null ? "-" : `${adh.overall_percent}%`, detail: `${adh.scheduled} scheduled doses`, tone: adherenceTone(adh.overall_percent) },
       { label: "Doses taken", value: String(adh.taken), tone: "good" },
       { label: "Doses missed", value: String(missedCount), detail: adh.skipped ? `+${adh.skipped} skipped` : undefined, tone: missedCount ? "warn" : "neutral" },
       { label: "Symptoms logged", value: String(symptoms.length), detail: symSummary.length ? `${symSummary.length} different` : undefined },

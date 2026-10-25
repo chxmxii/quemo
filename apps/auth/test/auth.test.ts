@@ -41,9 +41,9 @@ async function signUp(email = `rider${++seq}-${Date.now()}@quemo.test`, tz = "Eu
 describe("sign-up & sign-in with one email", () => {
   it("renders the city landing page", async () => {
     const html = await (await SELF.fetch(BASE)).text();
-    expect(html).toContain("QUEMO");
+    expect(html).toContain("quemo");
     expect(html).toContain('name="email"');
-    expect(html).toContain("Send my access code");
+    expect(html).toContain("Get my code");
     for (const tool of ["Budget", "Workout", "Health", "Food"]) expect(html).toContain(tool);
   });
 
@@ -84,7 +84,7 @@ describe("sign-up & sign-in with one email", () => {
     await SELF.fetch(`${BASE}/auth/email`, form({ email }));
     const url = new URL(lastEmail().link);
     const confirm = await (await SELF.fetch(url)).text(); // GET must not consume the token
-    expect(confirm).toContain("Enter Quemo City");
+    expect(confirm).toContain("Continue to quemo");
     const body = { token: url.searchParams.get("token")!, next: "/dashboard" };
     expect((await SELF.fetch(`${BASE}/auth/verify`, form(body))).status).toBe(303);
     expect((await SELF.fetch(`${BASE}/auth/verify`, form(body))).status).toBe(400);
@@ -251,7 +251,7 @@ describe("account deletion", () => {
     const key = html.match(/qmk_[A-Za-z0-9_-]{20,}/)![0];
 
     const wrong = await (await SELF.fetch(`${BASE}/dashboard/delete`, form({ confirm: "nope@x.y" }, { Cookie: cookie }))).text();
-    expect(wrong).toContain("account not deleted");
+    expect(wrong).toContain("account was not deleted");
     expect(await auth.getProfile(userId)).not.toBeNull();
 
     await SELF.fetch(`${BASE}/dashboard/delete`, form({ confirm: email }, { Cookie: cookie }));

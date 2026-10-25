@@ -316,9 +316,9 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
         place: text(120).optional().describe("Where, e.g. home, office, restaurant name"),
         note: text(1000).optional(),
         photo_description: text(1000).optional().describe("Short description of a photo the user shared"),
-        mood: rating.optional().describe("1 (bad) – 5 (great)"),
-        energy: rating.optional().describe("1 (drained) – 5 (energized)"),
-        hunger: rating.optional().describe("Hunger before eating, 1 (not hungry) – 5 (starving)"),
+        mood: rating.optional().describe("1 (bad) - 5 (great)"),
+        energy: rating.optional().describe("1 (drained) - 5 (energized)"),
+        hunger: rating.optional().describe("Hunger before eating, 1 (not hungry) - 5 (starving)"),
         items: z.array(itemInput).min(1).max(50),
       }),
     },
@@ -663,7 +663,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     },
     async (a) => {
       const ml = waterToMl(a.amount, a.unit ?? (units() === "imperial" ? "fl_oz" : "ml"));
-      if (ml > 10000) return fail("That's more than 10 litres at once — please check the amount.");
+      if (ml > 10000) return fail("That's more than 10 litres at once, please check the amount.");
       const wid = id();
       const date = a.date ?? today();
       await db
@@ -728,7 +728,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     { title: "Get nutrition goals", description: "The user's daily nutrition targets.", inputSchema: z.object({}), annotations: { readOnlyHint: true } },
     async () => {
       const g = await getGoals(db, uid);
-      return g ? ok(fmtGoals(g, units())) : ok({ goals: null }, "No nutrition goals set yet — ask the user (or suggest sensible ones) and call set_nutrition_goals.");
+      return g ? ok(fmtGoals(g, units())) : ok({ goals: null }, "No nutrition goals set yet, ask the user (or suggest sensible ones) and call set_nutrition_goals.");
     },
   );
 
@@ -839,20 +839,20 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       const weight = await weightTrend(db, uid, t, units());
       const nudges: string[] = [];
 
-      if (!day.meals.length) nudges.push("No meals logged today yet — tell me what you've eaten so far.");
-      for (const mt of missing) if (day.meals.length) nudges.push(`No ${mt} logged yet today — did you have one?`);
-      if (!goals) nudges.push("No nutrition goals set yet — set daily calories and protein with set_nutrition_goals to track progress.");
+      if (!day.meals.length) nudges.push("No meals logged today yet, tell me what you've eaten so far.");
+      for (const mt of missing) if (day.meals.length) nudges.push(`No ${mt} logged yet today, did you have one?`);
+      if (!goals) nudges.push("No nutrition goals set yet, set daily calories and protein with set_nutrition_goals to track progress.");
       if (goals?.calories && day.meals.length) {
         const left = goals.calories - day.totals.calories;
         nudges.push(left >= 0 ? `${fmt(Math.round(left))} kcal left for today.` : `${fmt(Math.round(-left))} kcal over today's goal.`);
       }
       if (goals?.protein_g && day.meals.length && day.totals.protein_g < goals.protein_g)
-        nudges.push(`${fmt(round(goals.protein_g - day.totals.protein_g, 0))} g protein to go — a protein-rich next meal would help.`);
+        nudges.push(`${fmt(round(goals.protein_g - day.totals.protein_g, 0))} g protein to go, a protein-rich next meal would help.`);
       if (goals?.water_ml) {
         const waterMl = (await dailyWater(db, uid, t, t))[0]?.ml ?? 0;
-        if (waterMl < goals.water_ml * 0.5 && time >= "14:00") nudges.push(`Only ${waterText(waterMl, units())} of water so far (goal ${waterText(goals.water_ml, units())}) — time for a glass.`);
+        if (waterMl < goals.water_ml * 0.5 && time >= "14:00") nudges.push(`Only ${waterText(waterMl, units())} of water so far (goal ${waterText(goals.water_ml, units())}), time for a glass.`);
       } else if (!day.water.entries.length && time >= "12:00") nudges.push("No water logged today.");
-      if (streak.current >= 3) nudges.push(`${streak.current}-day logging streak — keep it going!`);
+      if (streak.current >= 3) nudges.push(`${streak.current}-day logging streak, keep it going!`);
       else if (!streak.current && streak.last_logged) nudges.push(`Nothing logged since ${streak.last_logged}.`);
       if (week.days_logged && week.calorie_hit_rate !== null && week.calorie_hit_rate < 50) nudges.push(`Calories were on target on only ${week.calorie_hits} of ${week.days_logged} logged days last week.`);
       nudges.push(...pats.notes);
@@ -1049,7 +1049,7 @@ export async function patterns(db: D1Database, uid: string, from: string, to: st
   const notes: string[] = [];
   const lateDays = late?.days ?? 0;
   if (lateDays >= 3) notes.push(`Late-night eating (after ${LATE_NIGHT}) on ${lateDays} of the last ${daysBetween(from, to) + 1} days.`);
-  if (days.length >= 3 && lowFiber.length >= Math.ceil(days.length / 2)) notes.push(`Fiber was low on ${lowFiber.length} of ${days.length} logged days — add veg, fruit, legumes or whole grains.`);
+  if (days.length >= 3 && lowFiber.length >= Math.ceil(days.length / 2)) notes.push(`Fiber was low on ${lowFiber.length} of ${days.length} logged days, add veg, fruit, legumes or whole grains.`);
   if (highSodium.length >= 2) notes.push(`Sodium went above ${fmt(sodiumMax)} mg on ${highSodium.length} days.`);
   if (highSugar.length >= 2) notes.push(`Sugar went above your ${fmt(g!.sugar_max_g!)} g limit on ${highSugar.length} days.`);
   return {

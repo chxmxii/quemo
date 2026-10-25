@@ -53,13 +53,13 @@ export interface Report {
 
 const isEmpty = (s: Section) => !s.text && !s.kpis?.length && !s.bars?.length && !s.table?.rows.length && !s.bullets?.length;
 
-const mdCell = (c: Cell) => (c === null || c === undefined || c === "" ? "—" : String(c).replace(/\|/g, "\\|").replace(/\n/g, " "));
+const mdCell = (c: Cell) => (c === null || c === undefined || c === "" ? "-" : String(c).replace(/\|/g, "\\|").replace(/\n/g, " "));
 
 function mdBar(b: Bar): string {
   const ratio = b.max > 0 ? Math.max(0, Math.min(1, b.value / b.max)) : 0;
   const filled = Math.round(ratio * 16);
   const mark = b.tone === "bad" ? " ⚠" : b.tone === "good" ? " ✓" : "";
-  return `\`${"█".repeat(filled)}${"░".repeat(16 - filled)}\` **${b.label}** — ${b.display}${mark}`;
+  return `\`${"█".repeat(filled)}${"░".repeat(16 - filled)}\` **${b.label}**, ${b.display}${mark}`;
 }
 
 /** Markdown rendering: what the chat assistant shows inline. */
@@ -79,7 +79,7 @@ export function reportToMarkdown(r: Report, link?: string): string {
       continue;
     }
     if (s.text) out.push(s.text);
-    if (s.kpis?.length) out.push(...s.kpis.map((k) => `- **${k.label}:** ${k.value}${k.detail ? ` — ${k.detail}` : ""}`));
+    if (s.kpis?.length) out.push(...s.kpis.map((k) => `- **${k.label}:** ${k.value}${k.detail ? `, ${k.detail}` : ""}`));
     if (s.bars?.length) out.push(...s.bars.map((b) => `${mdBar(b)}  `));
     if (s.table?.rows.length) {
       const t = s.table;
@@ -97,28 +97,30 @@ export function reportToMarkdown(r: Report, link?: string): string {
   return out.join("\n");
 }
 
-const htmlCell = (c: Cell) => (c === null || c === undefined || c === "" ? '<span class="muted">—</span>' : e(c));
+const htmlCell = (c: Cell) => (c === null || c === undefined || c === "" ? '<span class="faint">-</span>' : e(c));
 
 function kpisHtml(kpis: Kpi[]): string {
   return `<div class="kpis">${kpis
-    .map((k) => `<div class="kpi ${k.tone ?? ""}"><span>${e(k.label)}</span><b>${e(k.value)}</b>${k.detail ? `<small>${e(k.detail)}</small>` : ""}</div>`)
+    .map((k) => `<div class="glass kpi ${k.tone ?? ""}"><span>${e(k.label)}</span><b>${e(k.value)}</b>${k.detail ? `<small>${e(k.detail)}</small>` : ""}</div>`)
     .join("")}</div>`;
 }
+
+const sectionStyle = 'style="display:grid;gap:16px"';
 
 /** Standalone, print-friendly HTML page. */
 export function reportToHtml(r: Report): string {
   const sections = r.sections
     .map((s) => {
-      if (isEmpty(s)) return `<section class="panel stack"><h3>${e(s.title)}</h3><p class="muted">${e(s.empty ?? "No data for this period.")}</p></section>`;
+      if (isEmpty(s)) return `<section class="glass pad" ${sectionStyle}><h3>${e(s.title)}</h3><p class="muted">${e(s.empty ?? "No data for this period.")}</p></section>`;
       const parts: string[] = [`<h3>${e(s.title)}</h3>`];
-      if (s.text) parts.push(`<p>${e(s.text)}</p>`);
+      if (s.text) parts.push(`<p class="muted">${e(s.text)}</p>`);
       if (s.kpis?.length) parts.push(kpisHtml(s.kpis));
       if (s.bars?.length)
         parts.push(
           `<div class="bars">${s.bars
             .map((b) => {
               const pct = b.max > 0 ? Math.max(0, Math.min(100, (b.value / b.max) * 100)) : 0;
-              return `<div class="bar ${b.tone ?? ""}"><span>${e(b.label)}</span><div class="track"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div><span class="muted">${e(b.display)}</span></div>`;
+              return `<div class="bar ${b.tone ?? ""}"><span>${e(b.label)}</span><div class="track"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div><span class="val">${e(b.display)}</span></div>`;
             })
             .join("")}</div>`,
         );
@@ -131,21 +133,24 @@ export function reportToHtml(r: Report): string {
             .join("")}</tbody></table></div>`,
         );
       }
-      if (s.bullets?.length) parts.push(`<ul>${s.bullets.map((b) => `<li>${e(b)}</li>`).join("")}</ul>`);
-      return `<section class="panel stack">${parts.join("")}</section>`;
+      if (s.bullets?.length) parts.push(`<ul style="margin:0;padding-left:20px;display:grid;gap:6px">${s.bullets.map((b) => `<li>${e(b)}</li>`).join("")}</ul>`);
+      return `<section class="glass pad" ${sectionStyle}>${parts.join("")}</section>`;
     })
     .join("");
 
-  const body = `<header class="stack fade" style="margin-bottom:28px">
-  <div class="row between"><span class="logo sm">QUEMO</span><span class="kicker">${e(r.tool)}</span></div>
-  <h1>${e(r.title)}</h1>
-  <p class="muted">${[r.period ? `${e(r.period.label)} · ${e(r.period.from)} → ${e(r.period.to)}` : "", r.subtitle ? e(r.subtitle) : ""].filter(Boolean).join(" · ")}</p>
-  <div class="row noprint"><button type="button" class="ghost mini" onclick="print()">Print / save as PDF</button></div>
+  const meta = [r.period ? `${e(r.period.label)}, ${e(r.period.from)} to ${e(r.period.to)}` : "", r.subtitle ? e(r.subtitle) : ""].filter(Boolean).join(". ");
+  const body = `<header class="rise" style="display:grid;gap:14px;padding:36px 0 28px">
+  <span class="chip" style="width:max-content">${e(r.tool)}</span>
+  <h1 style="font-size:clamp(34px,4.6vw,52px)">${e(r.title)}</h1>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+    <p class="muted">${meta}</p>
+    <button type="button" class="ghost sm noprint" onclick="print()"><i class="ph ph-printer"></i>Save as PDF</button>
+  </div>
 </header>
-${r.kpis.length ? kpisHtml(r.kpis) : ""}
-${r.highlights?.length ? `<section class="panel stack" style="margin-top:16px"><h3 class="grad">Highlights</h3><ul>${r.highlights.map((h) => `<li>${e(h)}</li>`).join("")}</ul></section>` : ""}
-<div class="stack" style="margin-top:16px">${sections}</div>
-${r.disclaimer ? `<p class="notice small" style="margin-top:20px">${e(r.disclaimer)}</p>` : ""}`;
+<div class="rise d1">${r.kpis.length ? kpisHtml(r.kpis) : ""}</div>
+${r.highlights?.length ? `<section class="glass pad rise d2" style="margin-top:14px;display:grid;gap:12px"><h3>Highlights</h3><ul style="margin:0;padding-left:20px;display:grid;gap:6px">${r.highlights.map((h) => `<li>${e(h)}</li>`).join("")}</ul></section>` : ""}
+<div class="rise d3" style="display:grid;gap:14px;margin-top:14px">${sections}</div>
+${r.disclaimer ? `<p class="notice" style="margin-top:18px"><i class="ph ph-info"></i>${e(r.disclaimer)}</p>` : ""}`;
   return layout({ title: `${r.title} · ${r.tool}`, body, variant: "report" });
 }
 

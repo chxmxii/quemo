@@ -106,7 +106,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       "'bench 4x8 at 70' → log_workout with exercises [{exercise: 'Bench Press', sets: [{reps: 8, weight: 70, count: 4}]}]; " +
       "'ran 5k in 25 min' → log_workout with a cardio exercise and a set {distance: 5, duration_sec: 1500}. " +
       "Log a whole session in ONE log_workout call (every exercise, in order); use add_sets to append to an existing workout (ids from list_workouts). " +
-      "Weights and distances are in the user's units (kg/km for metric, lb/mi for imperial) — never convert them yourself. Warm-up sets get is_warmup: true (excluded from volume and PRs). " +
+      "Weights and distances are in the user's units (kg/km for metric, lb/mi for imperial), never convert them yourself. Warm-up sets get is_warmup: true (excluded from volume and PRs). " +
       "Exercises are created on first use: reuse names from list_exercises when they match, use clear full names (e.g. 'Barbell Back Squat'), and pass muscle_group/type when you know them. " +
       "Always celebrate new PRs that log_workout returns. 'Do my Push day' → start_routine_workout to show the plan with last numbers; when done, log it with log_workout (routine: 'Push day') or start_routine_workout with log: true if done exactly as planned. " +
       "Body weight & measurements → log_body_metric. Targets → set_goal. 'How am I doing?' → follow_up; progress on a lift → exercise_progress; records → personal_records.",
@@ -127,7 +127,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       .all<ExerciseRow>();
     if (results.length === 1) return results[0];
     if (results.length > 1) return `Several exercises match "${name}": ${results.map((r) => r.name).join(", ")}. Which one?`;
-    return `No exercise named "${name}" yet — list_exercises shows what has been logged.`;
+    return `No exercise named "${name}" yet, list_exercises shows what has been logged.`;
   }
 
   async function exerciseId(name: string, hints: { muscle_group?: string; equipment?: string; type?: ExerciseType } = {}, inferred?: ExerciseType): Promise<string> {
@@ -317,13 +317,13 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
     date: zDate.optional().describe("Defaults to today"),
     start_time: zTime.optional(),
     duration_min: z.number().int().min(1).max(1440).optional(),
-    effort: z.number().int().min(1).max(10).optional().describe("Perceived effort of the whole session, 1 (easy) – 10 (max)"),
+    effort: z.number().int().min(1).max(10).optional().describe("Perceived effort of the whole session, 1 (easy) - 10 (max)"),
     notes: z.string().max(1000).optional(),
   };
 
   async function createWorkout(a: { name?: string; date?: string; start_time?: string; duration_min?: number; effort?: number; notes?: string }, routineId: string | null, entries: Entry[]) {
     const date = a.date ?? today();
-    if (date > today()) throw new Error(`${date} is in the future — log workouts once they're done.`);
+    if (date > today()) throw new Error(`${date} is in the future, log workouts once they're done.`);
     const wid = id();
     await db
       .prepare(
@@ -373,7 +373,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       let name = a.name;
       if (a.routine) {
         const r = await routineByName(a.routine);
-        if (!r) return fail(`No routine named "${a.routine}" — list_routines shows them.`);
+        if (!r) return fail(`No routine named "${a.routine}", list_routines shows them.`);
         routineId = r.id;
         name ??= r.name;
       }
@@ -716,7 +716,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
           duration_sec: i.target_duration_sec,
           notes: i.notes,
           target: [
-            `${i.target_sets} × ${i.target_reps ?? "—"}`,
+            `${i.target_sets} × ${i.target_reps ?? "-"}`,
             i.target_weight_kg ? `@ ${fmtWeight(i.target_weight_kg, units())}` : "",
             i.target_distance_km ? fmtDistance(i.target_distance_km, units()) : "",
             i.target_duration_sec ? fmtDuration(i.target_duration_sec) : "",
@@ -822,11 +822,11 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
           return fail(
             todays.length
               ? `Several routines are scheduled today: ${todays.map((x) => x.name).join(", ")}. Which one?`
-              : `No routine scheduled today${all.length ? ` — pick one of: ${all.map((x) => x.name).join(", ")}` : " and no routines saved yet (create_routine)"}.`,
+              : `No routine scheduled today${all.length ? `, pick one of: ${all.map((x) => x.name).join(", ")}` : " and no routines saved yet (create_routine)"}.`,
           );
         r = todays[0];
       }
-      if (!r) return fail(`No routine named "${a.routine}" — list_routines shows them.`);
+      if (!r) return fail(`No routine named "${a.routine}", list_routines shows them.`);
 
       if (a.log) {
         const entries: Entry[] = r.exercises.map((e) => ({
@@ -851,7 +851,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
           const hit = (last.reps_by_weight.get(Math.round(last.top_weight * 1000) / 1000) ?? 0) >= e.reps;
           const step = units() === "imperial" ? 5 : 2.5;
           const lastW = fromKg(last.top_weight, units());
-          suggestion = hit ? `Last time you hit ${e.reps}+ reps at ${lastW} ${wu()} — try ${round(lastW + step, 1)} ${wu()}.` : `Stay at ${lastW} ${wu()} and aim for ${e.reps} reps on every set.`;
+          suggestion = hit ? `Last time you hit ${e.reps}+ reps at ${lastW} ${wu()}, try ${round(lastW + step, 1)} ${wu()}.` : `Stay at ${lastW} ${wu()} and aim for ${e.reps} reps on every set.`;
         }
         plan.push({
           exercise: e.exercise,
@@ -866,7 +866,7 @@ export function buildServer(ctx: ToolContext<Env>): McpServer {
       }
       return ok(
         { routine: r.name, days: r.days, last_done: r.last_done, plan },
-        `${r.name}: ${plan.length} exercises. When done, log it with log_workout (routine: "${r.name}") — or start_routine_workout with log: true if it went exactly as planned.`,
+        `${r.name}: ${plan.length} exercises. When done, log it with log_workout (routine: "${r.name}"), or start_routine_workout with log: true if it went exactly as planned.`,
       );
     },
   );
@@ -1261,7 +1261,7 @@ export async function goalProgress(db: D1Database, uid: string, today: string, u
       achieved,
       deadline: g.deadline,
       days_left: g.deadline ? daysBetween(today, g.deadline) : null,
-      description: `${name}: ${current === null ? "no data yet" : `${withUnit(disp(current))}${period}`} (${percent}%)${achieved ? " — achieved" : ""}`,
+      description: `${name}: ${current === null ? "no data yet" : `${withUnit(disp(current))}${period}`} (${percent}%)${achieved ? " (achieved)" : ""}`,
     });
   }
   return out;
@@ -1317,18 +1317,18 @@ export async function followUp(db: D1Database, uid: string, today: string, u: Un
 
   const daysSince = last ? daysBetween(last.date, today) : null;
   const nudges: string[] = [];
-  if (!last) nudges.push("No workouts logged yet — tell me what you trained and I'll log it.");
+  if (!last) nudges.push("No workouts logged yet, tell me what you trained and I'll log it.");
   else if (daysSince! >= 3) nudges.push(`It's been ${daysSince} days since your last workout (${last.name} on ${last.date}).`);
-  for (const s of scheduled) if (!s.done_today) nudges.push(`Today is ${s.routine} — say "start ${s.routine}" to see the plan.`);
+  for (const s of scheduled) if (!s.done_today) nudges.push(`Today is ${s.routine}, say "start ${s.routine}" to see the plan.`);
   if (weeklyGoal) {
     const left = Number(weeklyGoal.target) - week.length;
-    nudges.push(left > 0 ? `${week.length} of ${weeklyGoal.target} workouts done this week — ${left} to go.` : `Weekly goal reached: ${week.length} workouts this week.`);
-  } else nudges.push("No weekly workout goal yet — try set_goal with workouts_per_week to track a streak.");
-  if (streak.weeks >= 2) nudges.push(`You're on a ${streak.weeks}-week streak — keep it going!`);
+    nudges.push(left > 0 ? `${week.length} of ${weeklyGoal.target} workouts done this week, ${left} to go.` : `Weekly goal reached: ${week.length} workouts this week.`);
+  } else nudges.push("No weekly workout goal yet, try set_goal with workouts_per_week to track a streak.");
+  if (streak.weeks >= 2) nudges.push(`You're on a ${streak.weeks}-week streak, keep it going!`);
   for (const g of neglected.slice(0, 3)) nudges.push(`You haven't trained ${g.muscle_group} in ${g.days_ago} days.`);
-  if (recentPrs.length) nudges.push(`${recentPrs.length} new PR${recentPrs.length > 1 ? "s" : ""} in the last 14 days — latest: ${describePr(recentPrs[0], u)}.`);
+  if (recentPrs.length) nudges.push(`${recentPrs.length} new PR${recentPrs.length > 1 ? "s" : ""} in the last 14 days, latest: ${describePr(recentPrs[0], u)}.`);
   for (const g of goals) if (!g.achieved && g.percent >= 90) nudges.push(`Almost there: ${g.description}.`);
-  if (latestWeight && daysBetween(latestWeight.date, today) >= 14) nudges.push(`Last weigh-in was ${daysBetween(latestWeight.date, today)} days ago — log your weight to keep the trend accurate.`);
+  if (latestWeight && daysBetween(latestWeight.date, today) >= 14) nudges.push(`Last weigh-in was ${daysBetween(latestWeight.date, today)} days ago, log your weight to keep the trend accurate.`);
 
   return {
     today,

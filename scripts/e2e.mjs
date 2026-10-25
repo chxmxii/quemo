@@ -85,7 +85,7 @@ async function main() {
 
   console.log("▶ one-email sign-up");
   const landing = await (await fetch(url("auth"))).text();
-  check(landing.includes("QUEMO") && landing.includes("Send my access code"), "landing page renders");
+  check(landing.includes("quemo") && landing.includes("Get my code"), "landing page renders");
   await post(`${url("auth")}/auth/email`, { email, tz: "Europe/Berlin", next: "/dashboard" });
   await sleep(500);
   const code = authLog.match(new RegExp(`sign-in for ${email.replace(/[.+]/g, "\\$&")}: code (\\d{6})`))?.[1];

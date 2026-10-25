@@ -17,4 +17,4 @@ Object.entries(APPS).forEach(([app, port], i) => {
   pipe(p.stdout);
   pipe(p.stderr);
 });
-console.log("Open http://localhost:8787 — sign-in codes appear in the [auth] log.");
+console.log("Open http://localhost:8787, sign-in codes appear in the [auth] log.");

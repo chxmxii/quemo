@@ -17,7 +17,7 @@ async function newUser(): Promise<{ mcp: Caller; userId: string }> {
 const today = () => localDate(TZ);
 const nowTime = () => localTime(TZ);
 const day = (offset: number) => addDays(today(), offset);
-/** Local wall-clock time `mins` minutes from now, wrapped to 00:00–23:59. */
+/** Local wall-clock time `mins` minutes from now, wrapped to 00:00-23:59. */
 const shift = (mins: number) => {
   const m = (((toMinutes(nowTime()) + mins) % 1440) + 1440) % 1440;
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
@@ -195,7 +195,7 @@ describe("schedule and dose logging", () => {
 
     const f = await mcp.call("follow_up");
     expect(f.refills_needed.map((r: any) => r.medication).sort()).toEqual(["Losartan", "Salbutamol"]);
-    expect(f.nudges.join(" ")).toMatch(/Losartan: about 2 days left \(5 units\) — time to refill at Apotheke am Markt/);
+    expect(f.nudges.join(" ")).toMatch(/Losartan: about 2 days left \(5 units\), time to refill at Apotheke am Markt/);
     expect(f.nudges.join(" ")).toMatch(/Salbutamol is out of stock/);
 
     const refilled = await mcp.call("refill_medication", { medication: "Losartan", quantity: 60 });
@@ -276,7 +276,7 @@ describe("vitals", () => {
     await mcp.call("log_vital", { type: "blood_pressure", systolic: 130, diastolic: 85, measured_at: `${day(-2)} 08:00` });
     const high = await mcp.call("log_vital", { type: "blood_pressure", systolic: 150, diastolic: 95, measured_at: `${day(-1)} 08:00`, note: "after coffee" });
     expect(high.flag).toMatchObject({ level: "attention" });
-    expect(high.flag.message).toMatch(/at or above 140\/90 — worth discussing with your doctor/);
+    expect(high.flag.message).toMatch(/at or above 140\/90, worth discussing with your doctor/);
     const crisis = await mcp.text("log_vital", { type: "blood_pressure", systolic: 185, diastolic: 121, measured_at: `${day(-1)} 09:00` });
     expect(crisis).toMatch(/contacting a healthcare professional promptly/);
     expect(crisis).not.toMatch(/hypertension|diagnos/i);
@@ -481,7 +481,7 @@ describe("follow-up and reports", () => {
     expect(md).toMatch(/http:\/\/localhost:8790\/reports\/[a-f0-9]{40}/);
     expect(md).toContain("Hypertension");
     expect(md).toContain("| Lisinopril | 10 mg | pill | 08:00 daily | Blood pressure |");
-    expect(md).toMatch(/\*\*Lisinopril\*\* — \d+% \(4\/\d\)/);
+    expect(md).toMatch(/\*\*Lisinopril\*\*, \d+% \(4\/\d\)/);
     expect(md).toContain("Adjust dose?");
     expect(md).toMatch(/1 reading was outside the usual range/);
     expect(md).toMatch(/Most frequent symptom: Dizziness/);

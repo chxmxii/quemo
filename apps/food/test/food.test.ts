@@ -268,12 +268,12 @@ describe("follow-up", () => {
     const f = await mcp.call("follow_up");
     const expectedMissing = missingMeals(["breakfast"], localTime(TZ));
     expect(f.missing_meals).toEqual(expectedMissing);
-    for (const m of expectedMissing) expect(f.nudges).toContain(`No ${m} logged yet today — did you have one?`);
+    for (const m of expectedMissing) expect(f.nudges).toContain(`No ${m} logged yet today, did you have one?`);
     expect(f.streak_days).toBe(3);
     expect(f.totals.calories).toBe(300);
     expect(f.remaining).toMatchObject({ calories: 1700, protein_g: 90 });
     expect(f.nudges).toContain("1,700 kcal left for today.");
-    expect(f.nudges).toContain("3-day logging streak — keep it going!");
+    expect(f.nudges).toContain("3-day logging streak, keep it going!");
     // last 7 complete days: 3 logged; only yesterday (2100 kcal, 110 g) hit both goals
     expect(f.last_7_days).toEqual({ days_logged: 3, calorie_hits: 1, protein_hits: 1, calorie_hit_rate: 33, protein_hit_rate: 33 });
     expect(f.nudges.join(" ")).toMatch(/on target on only 1 of 3 logged days/);

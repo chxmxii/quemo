@@ -5,7 +5,7 @@ import { describePr, fmtMinutes, fmtVolume, fmtWeight, loadSets, PR_LABELS, prEv
 const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 1000) / 10 : 0);
 
 function change(current: number, previous: number): string {
-  if (!previous) return current ? "new" : "—";
+  if (!previous) return current ? "new" : "-";
   const d = ((current - previous) / previous) * 100;
   return `${d > 0 ? "▲" : d < 0 ? "▼" : "="} ${Math.abs(Math.round(d))}%`;
 }
@@ -100,7 +100,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
   // ----- highlights -----
   const highlights: string[] = [];
   if (!workouts.length) highlights.push("No workouts logged in this period yet.");
-  if (prs.length) highlights.push(`${prs.length} personal record${prs.length > 1 ? "s" : ""} set — latest: ${describePr(prs.at(-1)!, u)}.`);
+  if (prs.length) highlights.push(`${prs.length} personal record${prs.length > 1 ? "s" : ""} set, latest: ${describePr(prs.at(-1)!, u)}.`);
   for (const e of improvements.slice(0, 2)) highlights.push(`${e.name} estimated 1RM up ${Math.round(e.gain)}% (${fmtWeight(e.first, u)} → ${fmtWeight(e.last, u)}).`);
   if (prevWorkouts.length || workouts.length)
     highlights.push(
@@ -108,7 +108,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
         (prevVolume ? `; volume ${change(volume, prevVolume)} (${vol(prevVolume)} before).` : "."),
     );
   if (byGroup[0]) highlights.push(`Most-trained muscle group: ${cap(byGroup[0][0])} (${byGroup[0][1].sets} working sets, ${pct(byGroup[0][1].sets, totalSets)}%).`);
-  for (const g of goals.filter((x) => x.achieved)) highlights.push(`Goal achieved: ${g.description.replace(/ — achieved$/, "")}.`);
+  for (const g of goals.filter((x) => x.achieved)) highlights.push(`Goal achieved: ${g.description.replace(/ \(achieved\)$/, "")}.`);
 
   const sections: Section[] = [];
 
@@ -161,7 +161,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
       ]),
       numeric: [3, 4],
     },
-    empty: "No new personal records in this period — PRs appear once an exercise beats an earlier session.",
+    empty: "No new personal records in this period, PRs appear once an exercise beats an earlier session.",
   });
 
   const lifts = exercises.filter((e) => e.e1rmSessions > 0).slice(0, 8);
@@ -170,7 +170,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     text: lifts.length ? `Estimated 1RM (Epley) of your most-trained lifts, first → last session in the period (${wu}).` : undefined,
     table: {
       columns: ["Exercise", "Sessions", "First e1RM", "Last e1RM", "Change", "Trend"],
-      rows: lifts.map((e) => [e.name, e.e1rmSessions, fmtWeight(e.first, u), fmtWeight(e.last, u), e.e1rmSessions >= 2 ? change(e.last, e.first) : "—", trendOf(e.first, e.last, e.e1rmSessions)]),
+      rows: lifts.map((e) => [e.name, e.e1rmSessions, fmtWeight(e.first, u), fmtWeight(e.last, u), e.e1rmSessions >= 2 ? change(e.last, e.first) : "-", trendOf(e.first, e.last, e.e1rmSessions)]),
       numeric: [1, 2, 3, 4],
     },
     empty: "No weighted lifts logged in this period.",
@@ -185,7 +185,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
         `${m.first_display} (${m.first.date})`,
         `${m.latest_display} (${m.latest.date})`,
         `${m.change > 0 ? "+" : ""}${m.change}${m.unit === "%" ? " pts" : ` ${m.unit}`}`,
-        `${m.min} – ${m.max}`,
+        `${m.min} - ${m.max}`,
         m.entries.length,
       ]),
       numeric: [3, 5],
@@ -195,7 +195,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
 
   sections.push({
     title: "Goals",
-    bars: goals.map((g) => ({ label: g.label + (g.exercise ? ` · ${g.exercise}` : ""), value: g.percent, max: 100, display: `${g.current ?? "—"} / ${g.target} ${g.unit} (${g.percent}%)`, tone: g.achieved ? "good" : g.percent < 50 ? "warn" : undefined })),
+    bars: goals.map((g) => ({ label: g.label + (g.exercise ? ` · ${g.exercise}` : ""), value: g.percent, max: 100, display: `${g.current ?? "-"} / ${g.target} ${g.unit} (${g.percent}%)`, tone: g.achieved ? "good" : g.percent < 50 ? "warn" : undefined })),
     table: {
       columns: ["Goal", "Current", "Target", "Progress", "Deadline"],
       rows: goals.map((g) => [g.label + (g.exercise ? ` · ${g.exercise}` : ""), g.current === null ? null : `${g.current} ${g.unit}`, `${g.target} ${g.unit}`, `${g.percent}%${g.achieved ? " ✓" : ""}`, g.deadline]),
@@ -227,9 +227,9 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     period: { from: range.from, to: range.to, label: range.label },
     kpis: [
       { label: "Sessions", value: String(workouts.length), detail: prevWorkouts.length ? `${change(workouts.length, prevWorkouts.length)} vs prev.` : undefined, tone: workouts.length ? "good" : "neutral" },
-      { label: "Total time", value: minutes ? fmtMinutes(minutes) : "—", detail: minutes && workouts.length ? `avg ${Math.round(minutes / workouts.length)} min` : undefined },
+      { label: "Total time", value: minutes ? fmtMinutes(minutes) : "-", detail: minutes && workouts.length ? `avg ${Math.round(minutes / workouts.length)} min` : undefined },
       { label: "Total volume", value: vol(volume), detail: prevVolume ? `${change(volume, prevVolume)} vs prev.` : undefined },
-      { label: "Avg effort", value: avgEffort === null ? "—" : `${avgEffort}/10`, tone: avgEffort === null ? "neutral" : avgEffort >= 9 ? "warn" : "good" },
+      { label: "Avg effort", value: avgEffort === null ? "-" : `${avgEffort}/10`, tone: avgEffort === null ? "neutral" : avgEffort >= 9 ? "warn" : "good" },
       {
         label: "Consistency",
         value: `${activeDays} active day${activeDays === 1 ? "" : "s"}`,

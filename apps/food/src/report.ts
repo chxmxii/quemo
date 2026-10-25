@@ -26,7 +26,7 @@ import {
 const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 1000) / 10 : 0);
 
 function change(current: number, previous: number): string {
-  if (!previous) return current ? "new" : "—";
+  if (!previous) return current ? "new" : "-";
   const d = ((current - previous) / previous) * 100;
   return `${d > 0 ? "▲" : d < 0 ? "▼" : "="} ${Math.abs(Math.round(d))}%`;
 }
@@ -179,7 +179,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     });
   sections.push({
     title: "Daily averages vs goals",
-    text: days.length ? `Averages over ${days.length} logged day${days.length === 1 ? "" : "s"}.${goals ? "" : " No goals set yet — ask your assistant to set daily calorie and protein targets."}` : undefined,
+    text: days.length ? `Averages over ${days.length} logged day${days.length === 1 ? "" : "s"}.${goals ? "" : " No goals set yet, ask your assistant to set daily calorie and protein targets."}` : undefined,
     bars: days.length ? avgBars : [],
     empty: "No meals logged in this period.",
   });
@@ -188,7 +188,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
   const split = macroSplit(sumTotals(days));
   sections.push({
     title: "Macro split",
-    text: split ? "Share of calories from each macronutrient (typical healthy ranges: protein 10–35%, carbs 45–65%, fat 20–35%)." : undefined,
+    text: split ? "Share of calories from each macronutrient (typical healthy ranges: protein 10-35%, carbs 45-65%, fat 20-35%)." : undefined,
     bars: split
       ? (
           [
@@ -196,7 +196,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
             ["Carbs", split.carbs_pct, AMDR.carbs],
             ["Fat", split.fat_pct, AMDR.fat],
           ] as const
-        ).map(([label, v, [lo, hi]]) => ({ label, value: v, max: 100, display: `${v}% (${lo}–${hi}%)`, tone: (v >= lo && v <= hi ? "good" : "warn") as Tone }))
+        ).map(([label, v, [lo, hi]]) => ({ label, value: v, max: 100, display: `${v}% (${lo}-${hi}%)`, tone: (v >= lo && v <= hi ? "good" : "warn") as Tone }))
       : [],
     empty: "No macro data logged yet.",
   });
@@ -209,7 +209,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
       rows: days.map((d) => {
         const c = calorieHit(d, goals);
         const p = proteinHit(d, goals);
-        const status = c === null ? "—" : `${c ? "✓ kcal" : d.calories > goals!.calories! ? "▲ kcal" : "▼ kcal"}${p === null ? "" : p ? " · ✓ protein" : " · ▼ protein"}`;
+        const status = c === null ? "-" : `${c ? "✓ kcal" : d.calories > goals!.calories! ? "▲ kcal" : "▼ kcal"}${p === null ? "" : p ? " · ✓ protein" : " · ▼ protein"}`;
         return [d.date, fmt(d.calories), `${fmt(d.protein_g)} g`, `${fmt(d.carbs_g)} g`, `${fmt(d.fat_g)} g`, `${fmt(d.fiber_g)} g`, waterMap.has(d.date) ? waterText(waterMap.get(d.date), units) : null, d.meals, status];
       }),
       numeric: [1, 2, 3, 4, 5, 6, 7],
@@ -327,14 +327,14 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     const hungry = r.filter((x) => (x.hunger ?? 0) >= 4);
     const calm = r.filter((x) => x.hunger !== null && x.hunger <= 2);
     if (hungry.length && calm.length)
-      moodBullets.push(`Meals eaten very hungry (4–5) averaged ${kcal(hungry.reduce((s, x) => s + x.calories, 0) / hungry.length)} vs ${kcal(calm.reduce((s, x) => s + x.calories, 0) / calm.length)} when barely hungry.`);
+      moodBullets.push(`Meals eaten very hungry (4-5) averaged ${kcal(hungry.reduce((s, x) => s + x.calories, 0) / hungry.length)} vs ${kcal(calm.reduce((s, x) => s + x.calories, 0) / calm.length)} when barely hungry.`);
   }
   sections.push({
     title: "Mood & energy",
-    text: r.length ? `${r.length} rated meal${r.length === 1 ? "" : "s"}. Average mood ${avgOf(r, (x) => x.mood) ?? "—"}/5, energy ${avgOf(r, (x) => x.energy) ?? "—"}/5.` : undefined,
+    text: r.length ? `${r.length} rated meal${r.length === 1 ? "" : "s"}. Average mood ${avgOf(r, (x) => x.mood) ?? "-"}/5, energy ${avgOf(r, (x) => x.energy) ?? "-"}/5.` : undefined,
     table: { columns: ["Rating", "Mood: meals", "Mood: avg kcal", "Energy: meals", "Energy: avg kcal", "Hunger: meals", "Hunger: avg kcal"], rows: moodRows, numeric: [1, 2, 3, 4, 5, 6] },
     bullets: moodBullets,
-    empty: "No mood, energy or hunger ratings logged — add them to meals to spot patterns.",
+    empty: "No mood, energy or hunger ratings logged, add them to meals to spot patterns.",
   });
 
   // ---------- patterns ----------
@@ -353,26 +353,26 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
     kpis: [
       {
         label: "Avg calories / day",
-        value: days.length ? kcal(avg.calories) : "—",
+        value: days.length ? kcal(avg.calories) : "-",
         detail: [goals?.calories ? `goal ${fmt(goals.calories)}` : null, prevDays.length && days.length ? `${change(avg.calories, prevAvg.calories)} vs prev.` : null].filter(Boolean).join(" · ") || undefined,
         tone: days.length ? calTone : "neutral",
       },
       {
         label: "Avg protein",
-        value: days.length ? `${fmt(avg.protein_g)} g` : "—",
+        value: days.length ? `${fmt(avg.protein_g)} g` : "-",
         detail: goals?.protein_g ? `goal ${fmt(goals.protein_g)} g` : undefined,
         tone: days.length ? (tone(avg.protein_g, goals?.protein_g ?? null, "min") ?? "neutral") : "neutral",
       },
       { label: "Days logged", value: `${days.length} / ${Math.max(elapsedDays, days.length)}`, tone: elapsedDays && days.length >= elapsedDays * 0.8 ? "good" : "warn" },
       {
         label: "Goal-hit rate",
-        value: hits.calorie_hit_rate === null ? "—" : `${hits.calorie_hit_rate}%`,
+        value: hits.calorie_hit_rate === null ? "-" : `${hits.calorie_hit_rate}%`,
         detail: hits.calorie_hit_rate === null ? (goals?.calories ? "no days logged" : "no calorie goal") : "calories within ±10%",
         tone: hits.calorie_hit_rate === null ? "neutral" : hits.calorie_hit_rate >= 70 ? "good" : hits.calorie_hit_rate >= 40 ? "warn" : "bad",
       },
       {
         label: "Avg water",
-        value: water.length ? waterText(avgWater, units) : "—",
+        value: water.length ? waterText(avgWater, units) : "-",
         detail: goals?.water_ml ? `goal ${waterText(goals.water_ml, units)}` : undefined,
         tone: water.length ? (tone(avgWater, goals?.water_ml ?? null, "min") ?? "neutral") : "neutral",
       },

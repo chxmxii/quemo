@@ -4,7 +4,7 @@ import { accountBalances, budgetStatus, goals, groupTotals, money, recurringRows
 const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 1000) / 10 : 0);
 
 function change(current: number, previous: number): string {
-  if (!previous) return current ? "new" : "—";
+  if (!previous) return current ? "new" : "-";
   const d = ((current - previous) / previous) * 100;
   return `${d > 0 ? "▲" : d < 0 ? "▼" : "="} ${Math.abs(Math.round(d))}%`;
 }
@@ -180,7 +180,7 @@ export async function buildReport(ctx: ToolContext<Env>, range: DateRange): Prom
       { label: "Income", value: m(income), detail: before.n ? `${change(income, before.income ?? 0)} vs prev.` : undefined, tone: "good" },
       { label: "Expenses", value: m(expense), detail: before.n ? `${change(expense, before.expense ?? 0)} vs prev.` : undefined },
       { label: "Net", value: m(net), tone: net >= 0 ? "good" : "bad" },
-      { label: "Savings rate", value: savingsRate === null ? "—" : `${savingsRate}%`, tone: savingsRate === null ? "neutral" : savingsRate >= 20 ? "good" : savingsRate >= 0 ? "warn" : "bad" },
+      { label: "Savings rate", value: savingsRate === null ? "-" : `${savingsRate}%`, tone: savingsRate === null ? "neutral" : savingsRate >= 20 ? "good" : savingsRate >= 0 ? "warn" : "bad" },
       { label: "Avg / day", value: m(Math.round(expense / elapsedDays)), detail: `${now.n} transactions` },
     ],
     highlights,
