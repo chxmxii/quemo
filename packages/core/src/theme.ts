@@ -44,20 +44,20 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* ambient light: a siren bar glowing at the top center. Blue, purple, pink and yellow pools
+/* ambient light: a siren bar glowing at the bottom center. Blue, purple, pink and yellow pools
    sit side by side just above the content and pulse out of phase (slow, never a strobe). */
-.aurora{position:fixed;left:50%;top:-14vmax;width:min(1100px,120vw);height:46vmax;transform:translateX(-50%);z-index:0;pointer-events:none;filter:blur(70px);opacity:var(--blob-o)}
-.aurora i{position:absolute;top:0;border-radius:50%;display:block;will-change:opacity,transform}
+.aurora{position:fixed;left:50%;bottom:-16vmax;width:min(1100px,120vw);height:46vmax;transform:translateX(-50%);z-index:0;pointer-events:none;filter:blur(70px);opacity:var(--blob-o)}
+.aurora i{position:absolute;bottom:0;border-radius:50%;display:block;will-change:opacity,transform}
 .aurora i:nth-child(1){width:30%;height:70%;left:4%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 18s ease-in-out infinite alternate}
 .aurora i:nth-child(2){width:30%;height:72%;left:24%;background:var(--accent);animation:sirenB 2.6s ease-in-out infinite,driftB 22s ease-in-out infinite alternate}
 .aurora i:nth-child(3){width:28%;height:66%;left:46%;background:var(--pink);animation:sirenA 2.6s ease-in-out .65s infinite,driftA 20s ease-in-out infinite alternate-reverse}
 .aurora i:nth-child(4){width:30%;height:70%;left:66%;background:var(--blue);animation:sirenB 2.6s ease-in-out infinite,driftB 24s ease-in-out infinite alternate-reverse}
-.aurora i:nth-child(5){width:16%;height:40%;left:42%;top:18%;background:var(--yellow);animation:sirenB 2.6s ease-in-out .65s infinite,driftA 26s ease-in-out infinite alternate}
+.aurora i:nth-child(5){width:16%;height:40%;left:42%;bottom:18%;background:var(--yellow);animation:sirenB 2.6s ease-in-out .65s infinite,driftA 26s ease-in-out infinite alternate}
 .aurora.quiet{opacity:calc(var(--blob-o) * .7)}
 @keyframes sirenA{0%,100%{opacity:1}50%{opacity:.18}}
 @keyframes sirenB{0%,100%{opacity:.18}50%{opacity:1}}
-@keyframes driftA{to{transform:translate(4%,6%) scale(1.08)}}
-@keyframes driftB{to{transform:translate(-4%,5%) scale(.92)}}
+@keyframes driftA{to{transform:translate(4%,-6%) scale(1.08)}}
+@keyframes driftB{to{transform:translate(-4%,-5%) scale(.92)}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -211,7 +211,21 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 .center .rows,.center .tabpanel{text-align:center}
 .center .copy{justify-content:center}
 .center .copy pre{text-align:center}
-.center .copy.block pre{text-align:left}
+
+/* reports and any remaining blocks sit on the middle axis too */
+.wide main{text-align:center}
+.wide main header,.wide main section{justify-items:center}
+.wide main header>div{justify-content:center!important}
+.wide main ul{list-style:none;padding-left:0!important;justify-items:center}
+.wide main .kpi{justify-items:center;text-align:center}
+.wide main .bars{width:100%}
+.wide main table{text-align:center}.wide main th,.wide main td{text-align:center}
+.wide main .notice{justify-content:center}
+.center .copy{justify-content:center}.center .copy pre{text-align:center}
+.center .field{justify-items:center}.center .field input,.center .field select{text-align:center}
+.center details{text-align:center}
+.center .tablist{display:flex}
+footer.foot{text-align:center}
 
 /* ---------- motion layer ---------- */
 @view-transition{navigation:auto}
