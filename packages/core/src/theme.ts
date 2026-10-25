@@ -11,7 +11,7 @@
 export const escapeHtml = (value: unknown) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap";
 const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
 export const THEME_CSS = `
@@ -25,7 +25,7 @@ export const THEME_CSS = `
   --ink:#111114;--on-ink:#fafafa;
   --shadow:none;
   --blob-a:#ff7a45;--blob-b:#ffc78a;--blob-c:#ffd9c7;--blob-o:.22;
-  --sans:"Geist",ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
+  --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
 @media (prefers-color-scheme:dark){:root{
@@ -58,15 +58,15 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
 
 .shell{position:relative;z-index:2;width:100%;max-width:760px;margin:0 auto;padding:0 20px}
 .wide .shell,.wide footer.foot{max-width:1000px}
-nav.top{display:flex;align-items:center;justify-content:space-between;height:68px}
-.wordmark{display:inline-flex;align-items:center;gap:9px;font-weight:500;font-size:16px;letter-spacing:-.02em;color:var(--text)}
+nav.top{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 0 0}
+.wordmark{display:inline-flex;align-items:center;gap:10px;font:500 15px/1 var(--display);letter-spacing:.32em;text-transform:uppercase;color:var(--text)}
 .wordmark:hover{text-decoration:none}
-.mark{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.mark{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px 2px var(--accent);animation:breathe 3.2s ease-in-out infinite}
 
-h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.03em;color:var(--text)}
-h1{font-size:clamp(32px,4.2vw,44px);line-height:1.1}
-h2{font-size:15px;line-height:1.4;letter-spacing:-.01em}
-h3{font-size:15px;line-height:1.4;letter-spacing:-.01em}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:500;letter-spacing:-.02em;color:var(--text)}
+h1{font-size:clamp(30px,4.6vw,48px);line-height:1.12;font-weight:400}
+h2{font-size:12px;line-height:1.4;letter-spacing:.22em;text-transform:uppercase;font-weight:400;color:var(--muted)}
+h3{font-size:14px;line-height:1.4;letter-spacing:.02em}
 .accent{color:var(--accent-ink)}
 .lede{font-size:16px;line-height:1.6;color:var(--muted);max-width:40ch;margin:0}
 .muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:13.5px}.mono{font-family:var(--mono);font-size:13px}
@@ -84,7 +84,7 @@ p{margin:0}
 
 /* forms */
 .field{display:grid;gap:7px}
-label,.label{font-size:13px;font-weight:500;color:var(--text)}
+label,.label{font:400 11px/1.4 var(--display);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
 .hint{font-size:12.5px;color:var(--muted)}
 input,select{font:inherit;font-size:15px;color:var(--text);background:var(--solid);border:1px solid var(--border-2);border-radius:12px;padding:12px 14px;width:100%;outline:none;
   transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
@@ -97,7 +97,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--a
   background-image:repeating-linear-gradient(90deg,transparent 0 44px,var(--border-2) 44px 45px,transparent 45px 47px)}
 
 /* buttons */
-.btn,button{font:inherit;font-size:14.5px;font-weight:550;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
+.btn,button{font:500 12.5px/1.2 var(--display);letter-spacing:.14em;text-transform:uppercase;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
   border:0;border-radius:999px;padding:11px 20px;color:var(--on-ink);background:var(--ink);text-decoration:none;
   transition:transform .15s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease)}
 .btn:hover,button:hover{text-decoration:none;opacity:.88}
@@ -163,9 +163,7 @@ section.block{display:grid;gap:14px;padding:40px 0 0}
 .center .beam,.center .otp{margin:0 auto;width:100%}
 .center .otp{text-align:center;text-indent:.62em;padding-left:0}
 .center form[style*="display:flex"]{display:flex!important;justify-content:center}
-.center .rows{text-align:left}
 .center .tablist{margin:0 auto}
-.center .tabpanel{text-align:left}
 .center .tabpanel>p{text-align:center}
 .center details summary{list-style-position:inside}
 
@@ -176,9 +174,32 @@ section.block{display:grid;gap:14px;padding:40px 0 0}
 .float{}
 @keyframes float{50%{transform:translateY(-6px)}}
 
-footer.foot{position:relative;z-index:2;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:760px;margin:0 auto;padding:40px 20px 36px;color:var(--faint);font-size:13px}
+footer.foot{position:relative;z-index:2;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;max-width:760px;margin:0 auto;padding:40px 20px 36px;color:var(--faint);font-size:13px}
 footer.foot a{color:var(--muted)}
 
+
+
+/* ---------- glow ---------- */
+@keyframes breathe{50%{box-shadow:0 0 22px 6px var(--accent);opacity:.85}}
+.reveal{animation:textGlow 4.5s ease-in-out 1.4s infinite}
+@keyframes textGlow{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 28px var(--accent-soft),0 0 2px var(--accent-soft)}}
+.rotator>span.on{text-shadow:0 0 24px rgba(255,90,31,.55),0 0 6px rgba(255,90,31,.35)}
+button:not(.ghost):not(.danger),.btn:not(.ghost){box-shadow:0 0 0 0 rgba(255,90,31,0);animation:aura 3.6s ease-in-out infinite}
+@keyframes aura{50%{box-shadow:0 0 28px -2px rgba(255,90,31,.45)}}
+button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px 0 rgba(255,90,31,.6);opacity:1}
+.beam:focus-within{box-shadow:0 0 30px -4px rgba(255,90,31,.45)}
+.rows>*:hover::before{box-shadow:0 0 30px -8px rgba(255,90,31,.4),inset 0 0 0 1px rgba(255,90,31,.25)}
+.copy{transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.copy:hover{border-color:rgba(255,90,31,.35);box-shadow:0 0 24px -8px rgba(255,90,31,.45)}
+.tablist .ind{box-shadow:0 0 18px -4px rgba(255,90,31,.5),0 1px 3px rgba(0,0,0,.08)}
+.otp{font-family:var(--display);font-weight:300}
+.kpi b{font-family:var(--display);font-weight:400}
+
+/* everything on the middle axis */
+.center .rows,.center .tabpanel{text-align:center}
+.center .copy{justify-content:center}
+.center .copy pre{text-align:center}
+.center .copy.block pre{text-align:left}
 
 /* ---------- motion layer ---------- */
 @view-transition{navigation:auto}

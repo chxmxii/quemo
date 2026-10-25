@@ -78,9 +78,9 @@ export function consentView(details: ConsentDescription, tool: ToolId | undefine
     <p class="lede">It will be able to read and update your ${t ? e(t.name) : "quemo"} data, and nothing from your other tools.</p>
   </div>
   <div class="rows stagger small">
-    <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Account</span><span>${e(email)}</span></div>
-    <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Sends access to</span><span>${e(details.redirectHost)}</span></div>
-    <div style="display:flex;justify-content:space-between;gap:12px"><span class="muted">Publisher</span><span>${details.clientDomain ? e(details.clientDomain) : "Not verified"}</span></div>
+    <div style="display:grid;gap:2px"><span class="label">Account</span><span>${e(email)}</span></div>
+    <div style="display:grid;gap:2px"><span class="label">Sends access to</span><span>${e(details.redirectHost)}</span></div>
+    <div style="display:grid;gap:2px"><span class="label">Publisher</span><span>${details.clientDomain ? e(details.clientDomain) : "Not verified"}</span></div>
   </div>
   ${details.redirectIsLoopback ? `<p class="small" style="color:var(--warn)">This sends access to an app on your computer. Only continue if you just started connecting from it.</p>` : ""}
   <form method="post" style="display:flex;gap:10px;justify-content:center">
@@ -121,7 +121,7 @@ export function dashboardView({ user, keys, connected, urls, flash }: DashboardD
 
   const tools = TOOL_IDS.map((t) => {
     const n = connected.get(t) ?? 0;
-    return `<div class="tool" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:center">
+    return `<div class="tool" style="display:grid;gap:12px;justify-items:center">
   <div style="display:grid;gap:2px"><span style="font-weight:500">${e(TOOLS[t].name)}</span><span class="small muted">${n ? `<span class="dot"></span>${n} app${n > 1 ? "s" : ""} linked` : "Not linked yet"}</span></div>
   ${copyBlock(`url-${t}`, urls[t])}
 </div>`;
@@ -137,7 +137,7 @@ export function dashboardView({ user, keys, connected, urls, flash }: DashboardD
 
   const keyRows = keys
     .map(
-      (k) => `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      (k) => `<div style="display:grid;gap:10px;justify-items:center">
   <div style="display:grid;gap:2px"><span>${e(k.name)}</span><span class="small muted mono">${e(k.prefix)}... used ${fmt(k.last_used_at).toLowerCase()}</span></div>
   <form method="post" action="/dashboard/keys/revoke"><input type="hidden" name="id" value="${e(k.id)}"><button class="ghost sm">Revoke</button></form>
 </div>`,
@@ -195,12 +195,11 @@ ${flash && !newKey ? `<p class="small" style="padding-top:24px;color:var(--ok)">
   </form></details>
 </section>
 <style>
-@media (max-width:760px){.tool{grid-template-columns:1fr!important}.pgrid{grid-template-columns:1fr 1fr!important}}
+@media (max-width:760px){.pgrid{grid-template-columns:1fr 1fr!important}}
 </style>
 <script>try{const l=document.getElementById("tzs");for(const z of Intl.supportedValuesOf("timeZone")){const o=document.createElement("option");o.value=z;l.appendChild(o)}}catch{}</script>`;
 
   const nav = `<nav class="top">${wordmark("/dashboard")}
-  <form method="post" action="/logout" style="display:flex;align-items:center;gap:14px"><span class="small muted email">${e(user.email)}</span><button class="ghost sm">Sign out</button></form></nav>
-  <style>@media (max-width:560px){.email{display:none}}</style>`;
+  <form method="post" action="/logout" style="display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap"><span class="small muted">${e(user.email)}</span><button class="ghost sm">Sign out</button></form></nav>`;
   return page("quemo", `${nav}${body}`, "app", true);
 }
