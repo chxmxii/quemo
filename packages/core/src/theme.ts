@@ -20,11 +20,11 @@ export const THEME_CSS = `
   --bg:#fafafa;--text:#111114;--muted:#5d5d68;--faint:#8b8b96;
   --surface:rgba(255,255,255,.58);--surface-2:rgba(255,255,255,.78);--solid:#ffffff;
   --border:rgba(17,17,20,.08);--border-2:rgba(17,17,20,.14);--hi:rgba(255,255,255,.75);
-  --accent:#8b5cf6;--accent-ink:#6d28d9;--accent-soft:rgba(139,92,246,.12);--blue:#3b82f6;--yellow:#facc15;
+  --accent:#8b5cf6;--accent-ink:#6d28d9;--accent-soft:rgba(139,92,246,.12);--blue:#3b82f6;--yellow:#facc15;--pink:#ec4899;
   --ok:#1d4ed8;--ok-soft:rgba(59,130,246,.12);--warn:#a16207;--warn-soft:rgba(250,204,21,.16);--bad:#7e22ce;--bad-soft:rgba(126,34,206,.10);
   --ink:#111114;--on-ink:#fafafa;
   --shadow:none;
-  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.38;
+  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.5;
   --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
@@ -32,11 +32,11 @@ export const THEME_CSS = `
   --bg:#050507;--text:#f2f2f4;--muted:#a1a1ab;--faint:#71717b;
   --surface:rgba(26,26,31,.52);--surface-2:rgba(34,34,40,.72);--solid:#17171b;
   --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--hi:rgba(255,255,255,.07);
-  --accent:#a78bfa;--accent-ink:#c4b5fd;--accent-soft:rgba(167,139,250,.14);--blue:#60a5fa;--yellow:#fde047;
+  --accent:#a78bfa;--accent-ink:#c4b5fd;--accent-soft:rgba(167,139,250,.14);--blue:#60a5fa;--yellow:#fde047;--pink:#f472b6;
   --ok:#60a5fa;--ok-soft:rgba(96,165,250,.12);--warn:#fde047;--warn-soft:rgba(253,224,71,.12);--bad:#c084fc;--bad-soft:rgba(192,132,252,.12);
   --ink:#f2f2f4;--on-ink:#111114;
   --shadow:none;
-  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.42;
+  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.55;
 }}
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%}
@@ -44,20 +44,20 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* ambient light: blurred purple / blue / yellow pools scattered around the page,
-   pulsing out of phase like a slow siren (gentle, well under 3 flashes per second) */
-.aurora{position:fixed;inset:-10vmax;z-index:0;pointer-events:none;filter:blur(90px);opacity:var(--blob-o)}
-.aurora i{position:absolute;border-radius:50%;display:block;will-change:opacity,transform}
-.aurora i:nth-child(1){width:38vmax;height:32vmax;left:-4%;top:6%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 34s ease-in-out infinite alternate}
-.aurora i:nth-child(2){width:40vmax;height:34vmax;right:-6%;top:2%;background:var(--accent);animation:sirenB 2.6s ease-in-out infinite,driftB 40s ease-in-out infinite alternate}
-.aurora i:nth-child(3){width:26vmax;height:22vmax;left:10%;bottom:-4%;background:var(--yellow);animation:sirenB 2.6s ease-in-out infinite,driftB 46s ease-in-out infinite alternate-reverse}
-.aurora i:nth-child(4){width:34vmax;height:28vmax;right:4%;bottom:-8%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 38s ease-in-out infinite alternate-reverse}
-.aurora i:nth-child(5){width:24vmax;height:20vmax;left:40%;top:38%;background:var(--accent);animation:sirenA 2.6s ease-in-out .65s infinite,driftB 50s ease-in-out infinite alternate}
+/* ambient light: a siren bar glowing at the top center. Blue, purple, pink and yellow pools
+   sit side by side just above the content and pulse out of phase (slow, never a strobe). */
+.aurora{position:fixed;left:50%;top:-14vmax;width:min(1100px,120vw);height:46vmax;transform:translateX(-50%);z-index:0;pointer-events:none;filter:blur(70px);opacity:var(--blob-o)}
+.aurora i{position:absolute;top:0;border-radius:50%;display:block;will-change:opacity,transform}
+.aurora i:nth-child(1){width:30%;height:70%;left:4%;background:var(--blue);animation:sirenA 2.6s ease-in-out infinite,driftA 18s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:30%;height:72%;left:24%;background:var(--accent);animation:sirenB 2.6s ease-in-out infinite,driftB 22s ease-in-out infinite alternate}
+.aurora i:nth-child(3){width:28%;height:66%;left:46%;background:var(--pink);animation:sirenA 2.6s ease-in-out .65s infinite,driftA 20s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(4){width:30%;height:70%;left:66%;background:var(--blue);animation:sirenB 2.6s ease-in-out infinite,driftB 24s ease-in-out infinite alternate-reverse}
+.aurora i:nth-child(5){width:16%;height:40%;left:42%;top:18%;background:var(--yellow);animation:sirenB 2.6s ease-in-out .65s infinite,driftA 26s ease-in-out infinite alternate}
 .aurora.quiet{opacity:calc(var(--blob-o) * .7)}
 @keyframes sirenA{0%,100%{opacity:1}50%{opacity:.18}}
 @keyframes sirenB{0%,100%{opacity:.18}50%{opacity:1}}
-@keyframes driftA{to{transform:translate(8vmax,6vmax) scale(1.1)}}
-@keyframes driftB{to{transform:translate(-8vmax,5vmax) scale(.9)}}
+@keyframes driftA{to{transform:translate(4%,6%) scale(1.08)}}
+@keyframes driftB{to{transform:translate(-4%,5%) scale(.92)}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -235,7 +235,7 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 .rotator:not(.js)>span:first-child,.rotator>span.on{opacity:1;filter:blur(0);transform:none}
 .rotator:not(.js){width:auto}.rotator:not(.js)>span:first-child{position:static}
 .rotator>span.on{animation:wordFlash 1.6s var(--ease)}
-.rotator>span:nth-child(3n+1){--c:#8b5cf6}.rotator>span:nth-child(3n+2){--c:#3b82f6}.rotator>span:nth-child(3n){--c:#facc15}
+.rotator>span:nth-child(4n+1){--c:#8b5cf6}.rotator>span:nth-child(4n+2){--c:#3b82f6}.rotator>span:nth-child(4n+3){--c:#ec4899}.rotator>span:nth-child(4n){--c:#facc15}
 @keyframes wordFlash{0%{color:var(--c);text-shadow:0 0 22px var(--c),0 0 6px var(--c)}55%{color:var(--c);text-shadow:0 0 16px var(--c)}100%{color:var(--text);text-shadow:0 0 0 transparent}}
 .rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
 
@@ -245,7 +245,7 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .beam{position:relative;border-radius:14px;padding:1px;background:var(--border-2)}
 .beam::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;transition:opacity .35s ease;
-  background:conic-gradient(from var(--a),transparent 0 58%,var(--blue) 70%,var(--accent) 82%,var(--yellow) 92%,transparent 98%);
+  background:conic-gradient(from var(--a),transparent 0 58%,var(--blue) 68%,var(--accent) 78%,var(--pink) 86%,var(--yellow) 93%,transparent 98%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 2.6s linear infinite}
 .beam:focus-within::before{opacity:1}
 .beam input{border:0;border-radius:13px;box-shadow:none!important}
