@@ -38,13 +38,13 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
    Base layer is a static gradient, the glow layer drifts very slowly (no pulsing). */
 .sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
   background:
-    radial-gradient(120% 70% at 50% 118%,rgba(250,204,21,.55) 0%,rgba(236,72,153,.45) 28%,transparent 62%),
-    radial-gradient(90% 60% at 12% 100%,rgba(236,72,153,.55),transparent 60%),
-    radial-gradient(90% 60% at 88% 100%,rgba(139,92,246,.6),transparent 62%),
-    radial-gradient(110% 70% at 50% -10%,rgba(37,99,235,.45),transparent 60%),
-    linear-gradient(180deg,#05040c 0%,#0d0a24 38%,#2a0f45 70%,#5b1650 100%)}
+    radial-gradient(100% 45% at 50% 115%,rgba(250,204,21,.28) 0%,rgba(236,72,153,.24) 30%,transparent 65%),
+    radial-gradient(70% 40% at 12% 105%,rgba(236,72,153,.28),transparent 60%),
+    radial-gradient(70% 40% at 88% 105%,rgba(139,92,246,.3),transparent 62%),
+    radial-gradient(90% 45% at 50% -12%,rgba(37,99,235,.22),transparent 60%),
+    linear-gradient(180deg,#05040c 0%,#07061a 55%,#130a26 85%,#1d0c2c 100%)}
 /* moving color layer: a big mesh of pink / purple / blue / yellow light that slowly swirls */
-.sky::before{content:"";position:absolute;left:-50%;top:-50%;width:200%;height:200%;opacity:.75;filter:blur(60px);
+.sky::before{content:"";position:absolute;left:50%;top:78vh;width:180vmax;height:180vmax;margin-left:-90vmax;opacity:.32;filter:blur(70px);
   background:
     radial-gradient(22% 18% at 30% 70%,#ec4899,transparent 70%),
     radial-gradient(24% 20% at 70% 72%,#8b5cf6,transparent 70%),
@@ -54,15 +54,17 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
     radial-gradient(20% 16% at 78% 42%,#ec4899,transparent 70%);
   animation:swirl 26s linear infinite}
 @keyframes swirl{to{transform:rotate(360deg)}}
-.sky i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.6;will-change:transform,background-color}
-.sky i:nth-child(1){width:52vmax;height:38vmax;left:-12vmax;bottom:-12vmax;background:#ec4899;animation:skyA 14s ease-in-out infinite alternate,tint 18s linear infinite}
-.sky i:nth-child(2){width:52vmax;height:38vmax;right:-12vmax;bottom:-10vmax;background:#8b5cf6;animation:skyB 17s ease-in-out infinite alternate,tint 18s linear -6s infinite}
-.sky i:nth-child(3){width:40vmax;height:24vmax;left:50%;bottom:-8vmax;margin-left:-20vmax;background:#facc15;opacity:.45;animation:skyC 11s ease-in-out infinite alternate}
-.sky i:nth-child(4){width:60vmax;height:30vmax;left:50%;top:-16vmax;margin-left:-30vmax;background:#2563eb;opacity:.5;animation:skyB 20s ease-in-out infinite alternate-reverse,tint 18s linear -12s infinite}
+.sky::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#05040c 0%,rgba(5,4,12,.85) 35%,transparent 70%)}
+.sky i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;will-change:transform,background-color}
+.sky i:nth-child(1){width:44vmax;height:26vmax;left:-10vmax;bottom:-16vmax;background:#ec4899;animation:skyA 14s ease-in-out infinite alternate,tint 18s linear infinite}
+.sky i:nth-child(2){width:44vmax;height:26vmax;right:-10vmax;bottom:-15vmax;background:#8b5cf6;animation:skyB 17s ease-in-out infinite alternate,tint 18s linear -6s infinite}
+.sky i:nth-child(3){width:40vmax;height:24vmax;left:50%;bottom:-8vmax;margin-left:-20vmax;background:#facc15;opacity:.22;animation:skyC 11s ease-in-out infinite alternate}
+.sky i:nth-child(4){width:56vmax;height:22vmax;left:50%;top:-16vmax;margin-left:-28vmax;background:#2563eb;opacity:.2;z-index:1;animation:skyTop 20s ease-in-out infinite alternate}
 .sky.quiet{opacity:.7}
-@keyframes skyA{to{transform:translate(26vmax,-10vmax) scale(1.2)}}
-@keyframes skyB{to{transform:translate(-26vmax,-8vmax) scale(1.15)}}
-@keyframes skyC{to{transform:translate(0,-8vmax) scale(1.3)}}
+@keyframes skyA{to{transform:translate(22vmax,-4vmax) scale(1.15)}}
+@keyframes skyB{to{transform:translate(-22vmax,-4vmax) scale(1.12)}}
+@keyframes skyTop{to{transform:translate(6vmax,2vmax) scale(1.1)}}
+@keyframes skyC{to{transform:translate(0,-4vmax) scale(1.2)}}
 @keyframes tint{0%,100%{background-color:#ec4899}33%{background-color:#8b5cf6}66%{background-color:#2563eb}}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
