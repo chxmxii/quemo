@@ -17,26 +17,26 @@ const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 export const THEME_CSS = `
 :root{
   color-scheme:light dark;
-  --bg:#f6f6f7;--text:#111114;--muted:#5d5d68;--faint:#8b8b96;
+  --bg:#fafafa;--text:#111114;--muted:#5d5d68;--faint:#8b8b96;
   --surface:rgba(255,255,255,.58);--surface-2:rgba(255,255,255,.78);--solid:#ffffff;
   --border:rgba(17,17,20,.08);--border-2:rgba(17,17,20,.14);--hi:rgba(255,255,255,.75);
-  --accent:#ff5a1f;--accent-ink:#c2410c;--accent-soft:rgba(255,90,31,.10);
-  --ok:#15803d;--ok-soft:rgba(21,128,61,.10);--warn:#a16207;--warn-soft:rgba(161,98,7,.10);--bad:#b91c1c;--bad-soft:rgba(185,28,28,.08);
+  --accent:#8b5cf6;--accent-ink:#6d28d9;--accent-soft:rgba(139,92,246,.12);--blue:#3b82f6;--yellow:#facc15;
+  --ok:#1d4ed8;--ok-soft:rgba(59,130,246,.12);--warn:#a16207;--warn-soft:rgba(250,204,21,.16);--bad:#7e22ce;--bad-soft:rgba(126,34,206,.10);
   --ink:#111114;--on-ink:#fafafa;
   --shadow:none;
-  --blob-a:#ff7a45;--blob-b:#ffc78a;--blob-c:#ffd9c7;--blob-o:.22;
+  --blob-a:#8b5cf6;--blob-b:#3b82f6;--blob-c:#facc15;--blob-o:.2;
   --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0b0b0e;--text:#f2f2f4;--muted:#a1a1ab;--faint:#71717b;
+  --bg:#050507;--text:#f2f2f4;--muted:#a1a1ab;--faint:#71717b;
   --surface:rgba(26,26,31,.52);--surface-2:rgba(34,34,40,.72);--solid:#17171b;
   --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--hi:rgba(255,255,255,.07);
-  --accent:#ff6a33;--accent-ink:#ff9466;--accent-soft:rgba(255,106,51,.12);
-  --ok:#4ade80;--ok-soft:rgba(74,222,128,.10);--warn:#fbbf24;--warn-soft:rgba(251,191,36,.10);--bad:#f87171;--bad-soft:rgba(248,113,113,.10);
+  --accent:#a78bfa;--accent-ink:#c4b5fd;--accent-soft:rgba(167,139,250,.14);--blue:#60a5fa;--yellow:#fde047;
+  --ok:#60a5fa;--ok-soft:rgba(96,165,250,.12);--warn:#fde047;--warn-soft:rgba(253,224,71,.12);--bad:#c084fc;--bad-soft:rgba(192,132,252,.12);
   --ink:#f2f2f4;--on-ink:#111114;
   --shadow:none;
-  --blob-a:#ff5a1f;--blob-b:#7c2d12;--blob-c:#431407;--blob-o:.16;
+  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.22;
 }}
 *{box-sizing:border-box}
 html{background:var(--bg);-webkit-text-size-adjust:100%}
@@ -49,7 +49,7 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
 .aurora i{position:absolute;border-radius:50%;display:block}
 .aurora i:nth-child(1){width:44vmax;height:30vmax;left:46%;top:2%;background:var(--blob-a);animation:driftA 40s ease-in-out infinite alternate}
 .aurora i:nth-child(2){width:36vmax;height:26vmax;left:30%;top:8%;background:var(--blob-b);animation:driftB 48s ease-in-out infinite alternate}
-.aurora i:nth-child(3){display:none}
+.aurora i:nth-child(3){width:22vmax;height:16vmax;left:60%;top:22%;background:var(--blob-c);opacity:.7;animation:driftB 44s ease-in-out infinite alternate-reverse}
 .aurora.quiet{opacity:calc(var(--blob-o) * .6)}
 @keyframes driftA{to{transform:translate(-6vmax,3vmax)}}
 @keyframes driftB{to{transform:translate(6vmax,2vmax)}}
@@ -145,7 +145,7 @@ td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 .bars{display:grid;gap:12px}
 .bar{display:grid;grid-template-columns:minmax(100px,190px) 1fr auto;gap:14px;align-items:center;font-size:14px}
 .bar .track{height:8px;border-radius:999px;overflow:hidden}
-.bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blob-b),var(--accent))}
+.bar .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--accent))}
 .bar.good .fill{background:var(--ok)}.bar.warn .fill{background:var(--warn)}.bar.bad .fill{background:var(--bad)}
 .bar .val{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
 
@@ -183,15 +183,15 @@ footer.foot a{color:var(--muted)}
 @keyframes breathe{50%{box-shadow:0 0 22px 6px var(--accent);opacity:.85}}
 .reveal{animation:textGlow 4.5s ease-in-out 1.4s infinite}
 @keyframes textGlow{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 28px var(--accent-soft),0 0 2px var(--accent-soft)}}
-.rotator>span.on{text-shadow:0 0 24px rgba(255,90,31,.55),0 0 6px rgba(255,90,31,.35)}
-button:not(.ghost):not(.danger),.btn:not(.ghost){box-shadow:0 0 0 0 rgba(255,90,31,0);animation:aura 3.6s ease-in-out infinite}
-@keyframes aura{50%{box-shadow:0 0 28px -2px rgba(255,90,31,.45)}}
-button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px 0 rgba(255,90,31,.6);opacity:1}
-.beam:focus-within{box-shadow:0 0 30px -4px rgba(255,90,31,.45)}
-.rows>*:hover::before{box-shadow:0 0 30px -8px rgba(255,90,31,.4),inset 0 0 0 1px rgba(255,90,31,.25)}
+.rotator>span.on{background:linear-gradient(90deg,var(--blue),var(--accent) 55%,var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(139,92,246,.5))}
+button:not(.ghost):not(.danger),.btn:not(.ghost){box-shadow:0 0 0 0 rgba(139,92,246,0);animation:aura 3.6s ease-in-out infinite}
+@keyframes aura{50%{box-shadow:0 0 28px -2px rgba(139,92,246,.45)}}
+button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px 0 rgba(139,92,246,.6);opacity:1}
+.beam:focus-within{box-shadow:0 0 30px -4px rgba(139,92,246,.45)}
+.rows>*:hover::before{box-shadow:0 0 30px -8px rgba(139,92,246,.4),inset 0 0 0 1px rgba(139,92,246,.25)}
 .copy{transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
-.copy:hover{border-color:rgba(255,90,31,.35);box-shadow:0 0 24px -8px rgba(255,90,31,.45)}
-.tablist .ind{box-shadow:0 0 18px -4px rgba(255,90,31,.5),0 1px 3px rgba(0,0,0,.08)}
+.copy:hover{border-color:rgba(139,92,246,.35);box-shadow:0 0 24px -8px rgba(139,92,246,.45)}
+.tablist .ind{box-shadow:0 0 18px -4px rgba(139,92,246,.5),0 1px 3px rgba(0,0,0,.08)}
 .otp{font-family:var(--display);font-weight:300}
 .kpi b{font-family:var(--display);font-weight:400}
 
@@ -229,7 +229,7 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .beam{position:relative;border-radius:14px;padding:1px;background:var(--border-2)}
 .beam::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;transition:opacity .35s ease;
-  background:conic-gradient(from var(--a),transparent 0 62%,var(--blob-b) 74%,var(--accent) 86%,transparent 96%);
+  background:conic-gradient(from var(--a),transparent 0 58%,var(--blue) 70%,var(--accent) 82%,var(--yellow) 92%,transparent 98%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 2.6s linear infinite}
 .beam:focus-within::before{opacity:1}
 .beam input{border:0;border-radius:13px;box-shadow:none!important}
@@ -293,7 +293,7 @@ export function layout({ title, body, variant = "app", head = "", bare = false }
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}">
 <script src="${ICONS}"></script>
-<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#ffb547"/><stop offset=".55" stop-color="#ff5a1f"/><stop offset="1" stop-color="#c2410c"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
+<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body${variant === "report" ? ' class="wide"' : ""}>
 <div class="aurora${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i></div>
 ${bare ? "" : `<div class="shell"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}

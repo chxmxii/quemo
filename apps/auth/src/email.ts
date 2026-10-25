@@ -17,7 +17,7 @@ export async function sendSignInEmail(env: Env, to: string, link: string, code: 
       text: `Your quemo sign-in code: ${code}\n\nOr open this link: ${link}\n\nIt expires in 15 minutes. If you didn't ask for it, you can ignore this email.`,
       html: `<div style="background:#f6f6f7;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111114">
 <div style="max-width:440px;margin:0 auto;background:#ffffff;border:1px solid #ececef;border-radius:20px;padding:32px">
-<div style="display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border-radius:10px;background:#ff5a1f;color:#fff;font-weight:600;font-size:17px">q</div>
+<div style="display:inline-block;width:32px;height:32px;line-height:32px;text-align:center;border-radius:10px;background:#8b5cf6;color:#fff;font-weight:600;font-size:17px">q</div>
 <h1 style="font-size:22px;letter-spacing:-.02em;margin:20px 0 6px;font-weight:600">Your sign-in code</h1>
 <p style="margin:0 0 20px;color:#5d5d68;font-size:15px">Enter it on the quemo page you just opened.</p>
 <div style="font:600 32px/1 'SFMono-Regular',Menlo,Consolas,monospace;letter-spacing:10px;background:#f6f6f7;border-radius:12px;padding:18px;text-align:center">${escapeHtml(code)}</div>
