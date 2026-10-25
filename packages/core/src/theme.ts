@@ -192,7 +192,6 @@ footer.foot a{color:var(--muted)}
 @keyframes breathe{50%{box-shadow:0 0 22px 6px var(--accent);opacity:.85}}
 .reveal{animation:textGlow 4.5s ease-in-out 1.4s infinite}
 @keyframes textGlow{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 28px var(--accent-soft),0 0 2px var(--accent-soft)}}
-.rotator>span.on{background:linear-gradient(90deg,var(--blue),var(--accent) 55%,var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(139,92,246,.5))}
 button:not(.ghost):not(.danger),.btn:not(.ghost){box-shadow:0 0 0 0 rgba(139,92,246,0);animation:aura 3.6s ease-in-out infinite}
 @keyframes aura{50%{box-shadow:0 0 28px -2px rgba(139,92,246,.45)}}
 button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px 0 rgba(139,92,246,.6);opacity:1}
@@ -225,10 +224,25 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 @keyframes wordIn{to{opacity:1;filter:blur(0);transform:none}}
 
 /* rotating word: all words share one grid cell, the active one slides + unblurs in */
-.rotator{display:inline-grid;vertical-align:bottom;color:var(--accent-ink)}
-.rotator>span{grid-area:1/1;opacity:0;filter:blur(8px);transform:translateY(.45em);transition:opacity .55s var(--ease),filter .55s var(--ease),transform .55s var(--ease)}
-.rotator>span.on{opacity:1;filter:blur(0);transform:none}
+
+/* rotating word: white, width follows the active word so the line stays centered; each arrival flashes a palette color */
+.rotator{display:inline-block;position:relative;height:1.3em;vertical-align:bottom;text-align:left;color:var(--text);transition:width .6s var(--ease)}
+.rotator>span{position:absolute;left:0;top:0;white-space:nowrap;opacity:0;filter:blur(8px);transform:translateY(.45em);transition:opacity .55s var(--ease),filter .55s var(--ease),transform .55s var(--ease)}
+.rotator:not(.js)>span:first-child,.rotator>span.on{opacity:1;filter:blur(0);transform:none}
+.rotator:not(.js){width:auto}.rotator:not(.js)>span:first-child{position:static}
+.rotator>span.on{animation:wordFlash 1.6s var(--ease)}
+.rotator>span:nth-child(3n+1){--c:#8b5cf6}.rotator>span:nth-child(3n+2){--c:#3b82f6}.rotator>span:nth-child(3n){--c:#facc15}
+@keyframes wordFlash{0%{color:var(--c);text-shadow:0 0 22px var(--c),0 0 6px var(--c)}55%{color:var(--c);text-shadow:0 0 16px var(--c)}100%{color:var(--text);text-shadow:0 0 0 transparent}}
 .rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
+
+/* QUEMO intro: the U stretches too long, a piece snaps off, falls and lands as the Q's tail */
+.brand{position:relative;display:inline-block}
+.brand .u{display:inline-block;transform-origin:50% 88%}
+.brand .tail{position:absolute;left:0;top:0;width:.085em;height:.3em;border-radius:.05em;background:currentColor;opacity:0;pointer-events:none;
+  box-shadow:0 0 18px rgba(139,92,246,.8),0 0 40px rgba(59,130,246,.35)}
+.brand.landed .tail{opacity:1}
+.brand.flash{animation:qFlash .9s var(--ease),brandGlow 5s ease-in-out .9s infinite}
+@keyframes qFlash{30%{text-shadow:0 0 30px #facc15,0 0 80px rgba(139,92,246,.9)}}
 
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
@@ -316,9 +330,34 @@ document.querySelectorAll(".rows.stagger>*").forEach((el,i)=>el.style.setPropert
 document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(".tablist");if(!list)return;const ind=document.createElement("span");ind.className="ind";list.prepend(ind);list.classList.add("js");
   const move=()=>{const r=tabs.querySelector("input:checked");if(!r)return;const l=list.querySelector('label[for="'+r.id+'"]');ind.style.width=l.offsetWidth+"px";ind.style.transform="translateX("+l.offsetLeft+"px)";list.querySelectorAll("label").forEach(x=>x.style.color=x===l?"var(--text)":"")};
   tabs.addEventListener("change",move);addEventListener("resize",move);move()});
+// rotating words (width follows the active word so the sentence stays centered)
+document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
+  if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
+// QUEMO intro: swap the Q for an O + a separate tail, then drop the tail from a stretched U
+document.querySelectorAll(".brand[data-intro]").forEach(b=>{
+  const q=b.querySelector(".q"),u=b.querySelector(".u");if(!q||!u)return;
+  const tail=document.createElement("i");tail.className="tail";tail.setAttribute("aria-hidden","true");b.appendChild(tail);
+  const spot=()=>{const br=b.getBoundingClientRect(),qr=q.getBoundingClientRect(),ur=u.getBoundingClientRect(),em=parseFloat(getComputedStyle(b).fontSize);
+    return{end:[qr.right-br.left-qr.width*.36,qr.bottom-br.top-em*.3],start:[ur.left-br.left+ur.width*.5-em*.04,ur.top-br.top-em*.35],em}};
+  const place=()=>{const p=spot();tail.style.transform="translate("+p.end[0]+"px,"+p.end[1]+"px) rotate(-42deg)"};
+  const run=()=>{
+    q.textContent="O";b.classList.remove("landed");
+    if(still){b.classList.add("landed");place();return}
+    const p=spot(),[sx,sy]=p.start,[ex,ey]=p.end,mx=(sx+ex)/2,my=Math.min(sy,ey)-p.em*.55;
+    u.animate([{transform:"scaleY(1)"},{transform:"scaleY(1.55)",offset:.45},{transform:"scaleY(1.6)",offset:.6},{transform:"scaleY(.9)",offset:.72},{transform:"scaleY(1.04)",offset:.85},{transform:"scaleY(1)"}],{duration:1300,easing:"cubic-bezier(.3,.7,.2,1)"});
+    setTimeout(()=>{b.classList.add("landed");
+      const a=tail.animate([
+        {transform:"translate("+sx+"px,"+sy+"px) rotate(0deg)",opacity:1},
+        {transform:"translate("+mx+"px,"+my+"px) rotate(-200deg)",offset:.45},
+        {transform:"translate("+ex+"px,"+ey+"px) rotate(-402deg)",offset:.82},
+        {transform:"translate("+ex+"px,"+(ey-p.em*.06)+"px) rotate(-396deg)",offset:.9},
+        {transform:"translate("+ex+"px,"+ey+"px) rotate(-402deg)"}],{duration:1100,easing:"cubic-bezier(.45,0,.55,1)",fill:"forwards"});
+      a.onfinish=()=>{place();a.cancel();b.classList.remove("flash");void b.offsetWidth;b.classList.add("flash")}},780)};
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(run,still?0:1300));
+  addEventListener("resize",()=>b.classList.contains("landed")&&place());
+  b.addEventListener("click",run);b.style.cursor="pointer";b.title="Replay";
+});
 if(still)return;
-// rotating words
-document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;w[0].classList.add("on");setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on")},2300)});
 // cursor glow with easing
 const g=document.querySelector(".glow");if(g&&matchMedia("(hover:hover)").matches){let x=innerWidth/2,y=innerHeight/3,tx=x,ty=y;addEventListener("pointermove",e=>{tx=e.clientX;ty=e.clientY;g.classList.add("on")});(function f(){x+=(tx-x)*.08;y+=(ty-y)*.08;g.style.transform="translate("+x+"px,"+y+"px)";requestAnimationFrame(f)})()}
 })();
