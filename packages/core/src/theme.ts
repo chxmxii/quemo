@@ -11,7 +11,7 @@
 export const escapeHtml = (value: unknown) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap";
 const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
 export const THEME_CSS = `
@@ -179,6 +179,15 @@ footer.foot a{color:var(--muted)}
 
 
 
+/* ---------- big centered brand ---------- */
+.brand{font:500 clamp(56px,13vw,132px)/1 var(--display);letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;margin:0;color:var(--text);
+  text-shadow:0 0 40px rgba(139,92,246,.45),0 0 90px rgba(59,130,246,.25);animation:brandIn 1.2s var(--ease) both,brandGlow 5s ease-in-out 1.2s infinite}
+@keyframes brandIn{from{opacity:0;letter-spacing:.5em;filter:blur(14px)}}
+@keyframes brandGlow{50%{text-shadow:0 0 56px rgba(139,92,246,.7),0 0 120px rgba(250,204,21,.18)}}
+.thin{font-family:var(--display);font-weight:200;letter-spacing:.01em;color:var(--text)}
+.tagline{font-size:clamp(20px,2.6vw,28px);line-height:1.3;margin:0}
+.lede.thin{font-family:var(--sans);font-weight:300;font-size:16px;opacity:.8}
+
 /* ---------- glow ---------- */
 @keyframes breathe{50%{box-shadow:0 0 22px 6px var(--accent);opacity:.85}}
 .reveal{animation:textGlow 4.5s ease-in-out 1.4s infinite}
@@ -205,10 +214,6 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.38s;animation-timing-function:cubic-bezier(.16,1,.3,1)}
 
-/* faint dot grid, fading out toward the edges */
-body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:radial-gradient(var(--border-2) 1px,transparent 1.2px);background-size:22px 22px;
-  -webkit-mask:radial-gradient(ellipse 70% 60% at 50% 20%,#000 20%,transparent 75%);mask:radial-gradient(ellipse 70% 60% at 50% 20%,#000 20%,transparent 75%)}
 /* cursor-following glow (positioned by JS) */
 .glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;z-index:0;pointer-events:none;
   background:radial-gradient(circle,var(--accent-soft) 0%,transparent 65%);opacity:0;transition:opacity .6s ease;will-change:transform}

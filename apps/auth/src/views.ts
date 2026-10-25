@@ -11,24 +11,22 @@ export function page(title: string, body: string, variant: "hero" | "app" = "app
 const narrow = (inner: string) => `<section class="rise center" style="max-width:440px;margin:0 auto;padding:12vh 0 8vh;display:grid;gap:28px">${inner}</section>`;
 
 export function signInView(next: string | null, error?: string, tool?: ToolId): string {
-  return page(
-    "quemo",
-    narrow(`<div style="display:grid;gap:12px">
-    ${tool ? `<p class="small muted">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
-    <h1 class="reveal" aria-label="Track your life from any chat.">${revealWords("Track your")}<br><span class="w rotator" style="--i:2"><span>money.</span><span>workouts.</span><span>meds.</span><span>meals.</span></span></h1>
-    <p class="lede rise d2">Just tell Claude, ChatGPT or any MCP app. quemo keeps the records.</p>
+  const body = `<section class="center" style="min-height:calc(100dvh - 90px);max-width:520px;margin:0 auto;display:grid;align-content:center;gap:34px;padding:40px 0">
+  <div style="display:grid;gap:18px">
+    ${tool ? `<p class="small muted rise">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
+    <h1 class="brand">Quemo</h1>
+    <p class="tagline thin reveal" aria-label="Track your life from any chat.">${revealWords("Track your", 3)} <span class="w rotator" style="--i:5"><span>money.</span><span>workouts.</span><span>meds.</span><span>meals.</span></span></p>
+    <p class="lede thin rise d3">Just tell Claude, ChatGPT or any MCP app.</p>
   </div>
-  <form method="post" action="/auth/email" class="rise d3" style="display:grid;gap:10px">
+  <form method="post" action="/auth/email" class="rise d4" style="display:grid;gap:12px;max-width:400px;margin:0 auto">
     <input type="hidden" name="next" value="${e(safeNext(next))}"><input type="hidden" name="tz" id="tz">
-    <label for="email">Email</label>
-    <div class="beam"><input id="email" type="email" name="email" placeholder="you@company.com" autocomplete="email" required autofocus></div>
+    <div class="beam"><input id="email" type="email" name="email" placeholder="you@company.com" aria-label="Email" autocomplete="email" required autofocus style="text-align:center"></div>
     ${error ? `<p class="small" style="color:var(--bad)">${e(error)}</p>` : ""}
-    <button style="margin-top:4px">Get my code<i class="ph ph-arrow-right"></i></button>
-    <p class="hint">No password. New or returning, it's the same step.</p>
+    <button>Get my code<i class="ph ph-arrow-right"></i></button>
   </form>
-  <script>try{document.getElementById("tz").value=Intl.DateTimeFormat().resolvedOptions().timeZone}catch{}</script>`),
-    "hero",
-  );
+  <script>try{document.getElementById("tz").value=Intl.DateTimeFormat().resolvedOptions().timeZone}catch{}</script>
+</section>`;
+  return layout({ title: "quemo", body, variant: "hero", bare: true });
 }
 
 export function checkInboxView(email: string, next: string, notice?: string): string {
