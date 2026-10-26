@@ -12,6 +12,10 @@ declare global {
       FOOD_URL: string;
       EMAIL_FROM: string;
       TEST_MIGRATIONS: D1Migration[];
+      BUDGET_SVC: Fetcher;
+      WORKOUT_SVC: Fetcher;
+      HEALTH_SVC: Fetcher;
+      FOOD_SVC: Fetcher;
     }
   }
 }

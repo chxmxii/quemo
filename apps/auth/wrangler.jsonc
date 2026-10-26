@@ -18,6 +18,13 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "quemo-auth", "database_id": "5222d77c-449c-42e7-b0c5-5c69fcbff969", "migrations_dir": "migrations" }
   ],
+  // Gateway: tools can be served under paths of this origin (/finance/mcp, /workout/mcp, …).
+  "services": [
+    { "binding": "BUDGET_SVC", "service": "quemo-budget" },
+    { "binding": "WORKOUT_SVC", "service": "quemo-workout" },
+    { "binding": "HEALTH_SVC", "service": "quemo-health" },
+    { "binding": "FOOD_SVC", "service": "quemo-food" }
+  ],
   "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "f8fda6dd037b4d4bb8a969bac433ae0a" }]
   // Secret: RESEND_API_KEY (wrangler secret put RESEND_API_KEY). Without it, sign-in codes are logged instead of emailed.
 }

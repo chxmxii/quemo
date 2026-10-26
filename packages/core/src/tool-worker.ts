@@ -37,7 +37,7 @@ export function createToolWorker<E extends ToolEnv>(def: ToolDefinition<E>) {
         async fetch(request, env, ctx) {
           const user = await env.AUTH.getProfile(ctx.props.userId);
           if (!user) return new Response("Account not found", { status: 401 });
-          const handler = createMcpHandler(() => def.build({ env, user }), { route: "/mcp" });
+          const handler = createMcpHandler(() => def.build({ env, user }), { route: `${basePath(env)}/mcp` });
           return handler(request, env, ctx);
         },
       },
@@ -46,9 +46,12 @@ export function createToolWorker<E extends ToolEnv>(def: ToolDefinition<E>) {
   return {
     async fetch(request: Request, env: E, ctx: ExecutionContext): Promise<Response> {
       const url = new URL(request.url);
-      if (url.pathname === "/") return Response.redirect(`${env.AUTH_URL.replace(/\/$/, "")}/dashboard`, 302);
-      if (url.pathname === "/health") return new Response("ok");
-      const report = url.pathname.match(/^\/reports\/([a-f0-9]{40})$/);
+      // The tool may live at its own origin ("/mcp") or under a path of the quemo gateway ("/finance/mcp").
+      const base = basePath(env);
+      const path = base && (url.pathname === base || url.pathname.startsWith(`${base}/`)) ? url.pathname.slice(base.length) || "/" : url.pathname;
+      if (path === "/") return Response.redirect(`${env.AUTH_URL.replace(/\/$/, "")}/dashboard`, 302);
+      if (path === "/health") return new Response("ok");
+      const report = path.match(/^\/reports\/([a-f0-9]{40})$/);
       if (report && request.method === "GET") {
         const r = await loadReport(env.DB, report[1]);
         return r
@@ -63,6 +66,9 @@ export function createToolWorker<E extends ToolEnv>(def: ToolDefinition<E>) {
     },
   };
 }
+
+/** Path prefix of PUBLIC_URL, e.g. "/finance" for https://quemo-auth.example.dev/finance, "" for a bare origin. */
+export const basePath = (env: ToolEnv) => new URL(env.PUBLIC_URL).pathname.replace(/\/$/, "");
 
 export async function purgeDeletedUsers(env: ToolEnv, tables: string[]): Promise<number> {
   const ids = await env.AUTH.deletedUsersSince(Date.now() - PURGE_WINDOW);

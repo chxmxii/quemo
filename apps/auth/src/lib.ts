@@ -11,6 +11,38 @@ export interface Env {
   FOOD_URL: string;
   EMAIL_FROM: string;
   RESEND_API_KEY?: string;
+  // Service bindings to the tool Workers, used when a tool is served under a path of this origin (/finance/mcp…).
+  BUDGET_SVC?: Fetcher;
+  WORKOUT_SVC?: Fetcher;
+  HEALTH_SVC?: Fetcher;
+  FOOD_SVC?: Fetcher;
+}
+
+const SERVICES: Record<ToolId, "BUDGET_SVC" | "WORKOUT_SVC" | "HEALTH_SVC" | "FOOD_SVC"> = {
+  budget: "BUDGET_SVC",
+  workout: "WORKOUT_SVC",
+  health: "HEALTH_SVC",
+  food: "FOOD_SVC",
+};
+
+/**
+ * Gateway routing: when a tool's public URL is a path on this origin (e.g. BUDGET_URL = https://quemo-auth…/finance),
+ * requests under that path, and its RFC 9728 metadata path, belong to that tool.
+ */
+export function gatewayTarget(env: Env, url: URL): ToolId | undefined {
+  for (const tool of TOOL_IDS) {
+    const t = new URL(toolUrls(env)[tool]);
+    const base = t.pathname.replace(/\/$/, "");
+    if (t.origin !== url.origin || !base) continue;
+    const p = url.pathname;
+    if (p === base || p.startsWith(`${base}/`) || p === `/.well-known/oauth-protected-resource${base}/mcp`) return tool;
+  }
+  return undefined;
+}
+
+export function gatewayFetch(env: Env, tool: ToolId, request: Request): Promise<Response> | Response {
+  const svc = env[SERVICES[tool]];
+  return svc ? svc.fetch(request) : new Response(`${tool} is not bound to the gateway`, { status: 502 });
 }
 
 export const TOOL_IDS: ToolId[] = ["budget", "workout", "health", "food"];

@@ -7,7 +7,7 @@
 //   node scripts/deploy.mjs migrate [app]    apply remote D1 migrations
 //   node scripts/deploy.mjs urls             print the public URLs
 //
-// Public URLs are kept in deploy.config.json (gitignored) and passed as --var at deploy time,
+// Public URLs and tool paths are kept in deploy.config.json (gitignored) and passed as --var at deploy time,
 // so wrangler.jsonc keeps localhost defaults for `wrangler dev` and tests. Edit that file to use custom domains.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -63,15 +63,26 @@ function migrate(apps) {
   }
 }
 
+// Tools are served as paths of the quemo-auth origin: https://quemo-auth.<you>.workers.dev/<slug>/mcp
+// Edit "routes" in deploy.config.json to rename a path (e.g. budget → "finance").
+const DEFAULT_ROUTES = { budget: "finance", workout: "workout", health: "health", food: "food" };
+const RESERVED = ["auth", "authorize", "oauth", "dashboard", "logout", "health-check", ".well-known"];
+
 /** Learns the account's workers.dev subdomain from the first auth deploy, then derives every URL. */
 function urls() {
   const c = loadConfig();
-  if (c.urls?.auth) return c.urls;
-  console.log("First deploy of quemo-auth to discover your workers.dev subdomain…");
-  const out = wrangler(["deploy", "-c", cfgPath("auth")]);
-  const sub = out.match(/https:\/\/quemo-auth\.([a-z0-9-]+)\.workers\.dev/)?.[1];
-  if (!sub) throw new Error(`Could not find the workers.dev URL in:\n${out}`);
-  c.urls = Object.fromEntries([...APPS, "backup"].map((a) => [a, `https://quemo-${a}.${sub}.workers.dev`]));
+  if (!c.urls?.auth) {
+    console.log("First deploy of quemo-auth to discover your workers.dev subdomain…");
+    const out = wrangler(["deploy", "-c", cfgPath("auth")]);
+    const sub = out.match(/https:\/\/quemo-auth\.([a-z0-9-]+)\.workers\.dev/)?.[1];
+    if (!sub) throw new Error(`Could not find the workers.dev URL in:\n${out}`);
+    c.urls = { auth: `https://quemo-auth.${sub}.workers.dev`, backup: `https://quemo-backup.${sub}.workers.dev` };
+  }
+  c.routes = { ...DEFAULT_ROUTES, ...c.routes };
+  for (const [tool, slug] of Object.entries(c.routes)) {
+    if (!/^[a-z][a-z0-9-]*$/.test(slug) || RESERVED.includes(slug)) throw new Error(`Invalid path "${slug}" for ${tool}`);
+    c.urls[tool] = `${c.urls.auth}/${slug}`;
+  }
   saveConfig(c);
   return c.urls;
 }

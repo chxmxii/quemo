@@ -2,7 +2,7 @@ import type { ValidatedAccessToken } from "@cloudflare/workers-oauth-provider";
 import type { AuthService, Profile, ProfilePatch, UserProps } from "@quemo/core";
 import { isValidTimezone } from "@quemo/core";
 import { WorkerEntrypoint } from "cloudflare:workers";
-import { API_KEY_PREFIX, authServer, getProfile, now, sha256, TOOL_IDS, toolForResource, type Env } from "./lib";
+import { API_KEY_PREFIX, authServer, gatewayFetch, gatewayTarget, getProfile, now, sha256, TOOL_IDS, toolForResource, type Env } from "./lib";
 import { handleWeb } from "./web";
 
 /**
@@ -11,6 +11,8 @@ import { handleWeb } from "./web";
  */
 export default class QuemoAuth extends WorkerEntrypoint<Env> implements AuthService {
   async fetch(request: Request): Promise<Response> {
+    const tool = gatewayTarget(this.env, new URL(request.url));
+    if (tool) return gatewayFetch(this.env, tool, request);
     return (await handleWeb(request, this.env)) ?? authServer(this.env).fetch(request, this.env, this.ctx);
   }
 

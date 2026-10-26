@@ -162,13 +162,32 @@ The private key is at `~/.config/quemo/backup-key.txt`. **Keep a copy in your pa
 
 OAuth grants in KV are not backed up. After a disaster, chat apps just sign in again.
 
+## One address, a path per tool
+
+All tools are served under the sign-in origin. `quemo-auth` acts as a gateway and forwards each path to that tool's own Worker over a private Service Binding:
+
+```
+https://quemo-auth.<you>.workers.dev/finance/mcp    → quemo-budget
+https://quemo-auth.<you>.workers.dev/workout/mcp    → quemo-workout
+https://quemo-auth.<you>.workers.dev/health/mcp     → quemo-health
+https://quemo-auth.<you>.workers.dev/food/mcp       → quemo-food
+```
+
+To rename a path, edit `"routes"` in `deploy.config.json` (for example `"budget": "money"`) and run `npm run deploy`. Do this before people connect, because OAuth tokens are bound to the exact URL.
+
+To add a brand-new MCP:
+1. Copy an app folder, for example `apps/food`, and change the tools.
+2. Add its id to `TOOLS` in `packages/core/src/types.ts`.
+3. Add a service binding and a `*_URL` var in `apps/auth`.
+4. Add a slug under `"routes"`.
+
 ## Connect your AI
 
 Sign in at your `quemo-auth` URL. The dashboard has copy-ready setup for every client:
 
 - **Claude** (web, desktop, mobile): Settings → Connectors → *Add custom connector* → paste a tool's URL (`…/mcp`) → sign in with your email.
 - **ChatGPT**: Settings → Apps & Connectors → Developer mode → *Create* → the tool URL with OAuth.
-- **Claude Code**: `claude mcp add --transport http quemo-budget https://quemo-budget.<you>.workers.dev/mcp`
+- **Claude Code**: `claude mcp add --transport http quemo-finance https://quemo-auth.<you>.workers.dev/finance/mcp`
 - **Cursor / VS Code / anything else**: the URL plus an `Authorization: Bearer qmk_…` header.
 - **stdio-only apps**: `npx mcp-remote <url> --header "Authorization: Bearer qmk_…"`
 
