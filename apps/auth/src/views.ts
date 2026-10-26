@@ -39,7 +39,10 @@ export function checkInboxView(email: string, next: string, notice?: string): st
   <form method="post" action="/auth/code" style="display:grid;gap:10px">
     <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
     <label for="code">Code</label>
-    <div class="beam" style="max-width:340px"><input id="code" class="otp" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="6" required autofocus></div>
+    <div class="otp" data-otp>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus aria-label="6-digit code">
+      <div class="otp-boxes" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
     ${notice ? `<p class="small" style="color:var(--warn)">${e(notice)}</p>` : ""}
     <button style="margin-top:4px;justify-self:center">Continue<i class="ph ph-arrow-right"></i></button>
   </form>

@@ -87,8 +87,6 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--a
 .inline{display:flex;gap:8px;padding:6px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border-2);transition:box-shadow .2s var(--ease),border-color .2s var(--ease)}
 .inline:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
 .inline input{border:0;background:transparent;box-shadow:none;padding:10px 14px;border-radius:999px}
-.otp{font:500 30px/1 var(--mono);letter-spacing:.62em;text-indent:.62em;text-align:left;padding:16px 0 16px 18px;max-width:320px;
-  background-image:repeating-linear-gradient(90deg,transparent 0 44px,var(--border-2) 44px 45px,transparent 45px 47px)}
 
 /* buttons */
 .btn,button{font:600 14.5px/1.2 var(--display);letter-spacing:-.01em;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
@@ -154,8 +152,7 @@ section.block{display:grid;gap:14px;padding:40px 0 0}
 .center .lede{margin:0 auto}
 .center form{display:grid;justify-items:center}
 .center form>*:not(input):not(.beam):not(.inline):not(div){justify-self:center}
-.center .beam,.center .otp{margin:0 auto;width:100%}
-.center .otp{text-align:center;text-indent:.62em;padding-left:0}
+.center .beam{margin:0 auto;width:100%}
 .center form[style*="display:flex"]{display:flex!important;justify-content:center}
 .center .tablist{margin:0 auto}
 .center .tabpanel>p{text-align:center}
@@ -187,7 +184,6 @@ button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{opacity:1;backgroun
 .rows>*:hover::before{box-shadow:inset 0 0 0 1px var(--border)}
 .copy{transition:border-color .3s var(--ease)}
 .copy:hover{border-color:var(--border-2)}
-.otp{font-family:var(--mono);font-weight:500}
 .kpi b{font-family:var(--display);font-weight:600;letter-spacing:-.04em}
 .rotator{color:var(--text)}
 
@@ -241,6 +237,23 @@ footer.foot{text-align:center}
 
 .brand{display:block;text-align:center}
 
+/* 6-digit code: one real input (keyboard, paste, SMS/email autofill all work) laid invisibly over six display boxes.
+   Without JS the input simply shows as a normal field. */
+.otp{position:relative;width:100%;max-width:372px;margin:0 auto}
+.otp input{font:500 22px var(--mono);letter-spacing:.4em;text-align:center}
+.otp-boxes{display:none}
+.otp.js input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;caret-color:transparent;cursor:text;z-index:2;padding:0;border:0}
+.otp.js .otp-boxes{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.otp-boxes span{height:64px;border-radius:14px;display:grid;place-items:center;font:500 28px/1 var(--mono);color:var(--text);
+  background:var(--surface-2);border:1px solid var(--border-2);transition:border-color .2s var(--ease),box-shadow .2s var(--ease),transform .2s var(--ease)}
+.otp-boxes span.filled{animation:digitIn .25s var(--ease)}
+.otp.focus .otp-boxes span.active{border-color:var(--text);box-shadow:0 0 0 4px rgba(255,255,255,.08)}
+.otp.focus .otp-boxes span.active:empty::after{content:"";width:2px;height:28px;background:var(--text);animation:caret 1s steps(1) infinite}
+.otp.done .otp-boxes span{border-color:rgba(255,255,255,.45)}
+@keyframes digitIn{from{transform:scale(.85);opacity:.4}}
+@keyframes caret{50%{opacity:0}}
+@media (max-width:420px){.otp.js .otp-boxes{gap:6px}.otp-boxes span{height:54px;font-size:24px}}
+
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .beam{position:relative;border-radius:999px;padding:1px;background:var(--border-2)}
@@ -282,7 +295,7 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 [data-copy].done{color:var(--ok)}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}}
-@media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
+@media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
   html,body{background:#fff!important;color:#111}.prism,.veil,.noprint,nav.top,footer.foot{display:none!important}
@@ -354,6 +367,14 @@ ${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class
 <script>
 (()=>{
 const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+// 6-digit code boxes: mirror the real input; keep only digits; submit when complete.
+document.querySelectorAll("[data-otp]").forEach(w=>{const inp=w.querySelector("input"),boxes=[...w.querySelectorAll(".otp-boxes span")];if(!inp)return;w.classList.add("js");
+  const render=()=>{const v=inp.value;boxes.forEach((b,i)=>{const ch=v[i]??"";if(b.textContent!==ch){b.textContent=ch;b.classList.toggle("filled",!!ch)}b.classList.toggle("active",i===Math.min(v.length,5))});w.classList.toggle("done",v.length===6)};
+  inp.addEventListener("input",()=>{const d=inp.value.replace(/[^0-9]/g,"").slice(0,6);if(d!==inp.value)inp.value=d;render();if(d.length===6&&inp.form){inp.blur();setTimeout(()=>inp.form.requestSubmit(),120)}});
+  inp.addEventListener("focus",()=>{w.classList.add("focus");const n=inp.value.length;inp.setSelectionRange(n,n)});inp.addEventListener("blur",()=>w.classList.remove("focus"));
+  const toEnd=()=>{const n=inp.value.length;if(inp.selectionStart!==n||inp.selectionEnd!==n)inp.setSelectionRange(n,n)};["click","keyup","select"].forEach(t=>inp.addEventListener(t,toEnd));
+  w.addEventListener("mousedown",e=>{if(e.target!==inp){e.preventDefault();inp.focus()}});
+  render();if(document.activeElement===inp)w.classList.add("focus");else inp.focus({preventScroll:true})});
 
 document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';b.classList.add("done");setTimeout(()=>{b.innerHTML=o;b.classList.remove("done")},1400)})});
 document.querySelectorAll(".spot").forEach(el=>el.addEventListener("pointermove",e=>{const r=el.getBoundingClientRect();el.style.setProperty("--x",(e.clientX-r.left)+"px");el.style.setProperty("--y",(e.clientY-r.top)+"px")}));
