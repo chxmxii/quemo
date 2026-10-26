@@ -4,3 +4,4 @@ export * from "./theme";
 export * from "./report";
 export * from "./mcp";
 export * from "./tool-worker";
+export * from "./xlsx";

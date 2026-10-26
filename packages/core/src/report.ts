@@ -93,7 +93,7 @@ export function reportToMarkdown(r: Report, link?: string): string {
     if (s.bullets?.length) out.push("", ...s.bullets.map((b) => `- ${b}`));
   }
   if (r.disclaimer) out.push("", `> ${r.disclaimer}`);
-  if (link) out.push("", `📄 Printable / shareable version: ${link}`);
+  if (link) out.push("", `📄 Printable / PDF version: ${link}`, `📊 Excel workbook: ${link}.xlsx`);
   return out.join("\n");
 }
 
@@ -108,7 +108,7 @@ function kpisHtml(kpis: Kpi[]): string {
 const sectionStyle = 'style="display:grid;gap:16px"';
 
 /** Standalone, print-friendly HTML page. */
-export function reportToHtml(r: Report): string {
+export function reportToHtml(r: Report, xlsxHref?: string): string {
   const sections = r.sections
     .map((s) => {
       if (isEmpty(s)) return `<section class="glass pad" ${sectionStyle}><h3>${e(s.title)}</h3><p class="muted">${e(s.empty ?? "No data for this period.")}</p></section>`;
@@ -144,7 +144,7 @@ export function reportToHtml(r: Report): string {
   <h1 style="font-size:clamp(34px,4.6vw,52px)">${e(r.title)}</h1>
   <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
     <p class="muted">${meta}</p>
-    <button type="button" class="ghost sm noprint" onclick="print()"><i class="ph ph-printer"></i>Save as PDF</button>
+    <span class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><a class="btn ghost sm" href="${xlsxHref ?? ""}" download><i class="ph ph-microsoft-excel-logo"></i>Download Excel</a><button type="button" class="ghost sm" onclick="print()"><i class="ph ph-printer"></i>Save as PDF</button></span>
   </div>
 </header>
 <div class="rise d1">${r.kpis.length ? kpisHtml(r.kpis) : ""}</div>

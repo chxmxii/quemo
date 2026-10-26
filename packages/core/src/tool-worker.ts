@@ -2,6 +2,7 @@ import { OAuthResourceServer } from "@cloudflare/workers-oauth-provider";
 import type { McpServer } from "@modelcontextprotocol/server";
 import { createMcpHandler } from "agents/mcp";
 import { loadReport, reportToHtml } from "./report";
+import { reportToXlsx, XLSX_TYPE } from "./xlsx";
 import { htmlResponse, layout } from "./theme";
 import { TOOLS, type ToolContext, type ToolEnv, type ToolId, type UserProps } from "./types";
 
@@ -51,11 +52,17 @@ export function createToolWorker<E extends ToolEnv>(def: ToolDefinition<E>) {
       const path = base && (url.pathname === base || url.pathname.startsWith(`${base}/`)) ? url.pathname.slice(base.length) || "/" : url.pathname;
       if (path === "/") return Response.redirect(`${env.AUTH_URL.replace(/\/$/, "")}/dashboard`, 302);
       if (path === "/health") return new Response("ok");
-      const report = path.match(/^\/reports\/([a-f0-9]{40})$/);
+      const report = path.match(/^\/reports\/([a-f0-9]{40})(\.xlsx)?$/);
       if (report && request.method === "GET") {
         const r = await loadReport(env.DB, report[1]);
+        if (r && report[2]) {
+          const name = `${r.title} ${r.period ? `${r.period.from} to ${r.period.to}` : ""}`.trim().replace(/[^\w .-]+/g, "");
+          return new Response(reportToXlsx(r), {
+            headers: { "Content-Type": XLSX_TYPE, "Content-Disposition": `attachment; filename="${name}.xlsx"`, "Cache-Control": "private, no-store" },
+          });
+        }
         return r
-          ? htmlResponse(reportToHtml(r))
+          ? htmlResponse(reportToHtml(r, `${report[1]}.xlsx`))
           : htmlResponse(layout({ title: "Report not found", body: `<h1>Report expired</h1><p class="muted">Ask your assistant to generate a new one.</p>` }), 404);
       }
       return getResourceServer(env).fetch(request, env, ctx);

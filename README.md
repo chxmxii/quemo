@@ -21,7 +21,7 @@ Four MCP servers on Cloudflare Workers + one neon-soaked sign-in. Register with 
 
 Every tool has:
 - **`follow_up`**: a check-in. It shows what's due, what's at risk, streaks, and plain-language nudges.
-- **`generate_report`**: an organized report for any period (today, this week, last month, last 90 days, custom…). It contains KPIs, highlights, a comparison with the previous period, tables and bars. Your chat gets it as Markdown, plus a **printable page** you can save as a PDF.
+- **`generate_report`**: an organized report for any period (today, this week, last month, last 90 days, custom…). It contains KPIs, highlights, a comparison with the previous period, tables and bars. Your chat gets it as Markdown, plus a **printable page** you can save as a PDF and a formatted **Excel workbook** (`.xlsx`). The workbook has a Summary sheet, one sheet per section, real numbers, currencies, percentages and dates, frozen headers, filters and in-cell data bars.
 - **`get_profile` / `update_profile`**: one shared profile (name, time zone, currency, metric/imperial) used by all four tools.
 
 <details><summary><strong>All tools</strong></summary>
@@ -111,7 +111,7 @@ npm run test:e2e    # boots all 5 Workers and walks the real journey across them
 
 | Suite | Tests | Covers |
 |---|---:|---|
-| core | 7 | time-zone dates, periods, report Markdown/HTML rendering & escaping |
+| core | 9 | time-zone dates, periods, report Markdown/HTML rendering & escaping, Excel export (typed cells, sheets, styles) |
 | auth | 18 | sign-up, codes, rate limits, lockout, magic links, open-redirect & CSRF guards, profile, API keys, full OAuth + PKCE, audience binding, account deletion |
 | budget | 25 | transactions, cents precision, accounts & transfers, budgets, recurring bills, savings goals, summaries, follow-up, reports, isolation, purge, HTTP/OAuth challenge |
 | workout | 34 | sets & units, PR detection, e1RM, progress, routines, body metrics, goals, streaks, reports, isolation, HTTP |

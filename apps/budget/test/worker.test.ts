@@ -53,6 +53,16 @@ describe("worker over HTTP", () => {
     expect(html).toContain("Budget Report");
     expect(html).toContain("Spending by category");
     expect((await SELF.fetch(`${BASE}/reports/${"0".repeat(40)}`)).status).toBe(404);
+    expect(html).toContain("Download Excel");
+    const text = report.json.result.content[0].text as string;
+    expect(text).toContain(`${url}.xlsx`);
+    const xlsx = await SELF.fetch(`${url}.xlsx`);
+    expect(xlsx.status).toBe(200);
+    expect(xlsx.headers.get("Content-Type")).toBe("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    expect(xlsx.headers.get("Content-Disposition")).toMatch(/^attachment; filename="Budget Report \d{4}-\d{2}-\d{2} to \d{4}-\d{2}-\d{2}\.xlsx"$/);
+    const bytes = new Uint8Array(await xlsx.arrayBuffer());
+    expect([bytes[0], bytes[1]]).toEqual([0x50, 0x4b]); // "PK" zip header
+    expect((await SELF.fetch(`${BASE}/reports/${"0".repeat(40)}.xlsx`)).status).toBe(404);
   });
 
   it("redirects the root to the Quemo dashboard", async () => {
