@@ -1,5 +1,5 @@
 /**
- * Quemo's shared look: ink-black type on a warm white ground with a twisting rainbow ribbon behind.
+ * Quemo's shared look: white type on black, with a heavily blurred rainbow ribbon that glows now and then.
  * Used by quemo-auth pages and by every tool's printable report.
  *
  * Shape system: containers 20px, inputs 12px, buttons and chips are full pills.
@@ -16,14 +16,14 @@ const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
 export const THEME_CSS = `
 :root{
-  color-scheme:light;
-  --bg:#fbfaf6;--text:#131109;--muted:#13110999;--faint:#1311096b;
-  --surface:rgba(255,255,255,.62);--surface-2:rgba(255,255,255,.82);--solid:#ffffff;
-  --border:#1311091f;--border-2:#13110933;--hi:rgba(255,255,255,.8);
-  --accent:#131109;--accent-ink:#131109;--accent-soft:rgba(19,17,9,.06);--blue:#2f6bff;--yellow:#ffc928;--pink:#ff4fa3;
-  --ok:#1d4ed8;--ok-soft:rgba(47,107,255,.10);--warn:#9a6a00;--warn-soft:rgba(255,201,40,.18);--bad:#b4236b;--bad-soft:rgba(255,79,163,.10);
-  --ink:#131109;--on-ink:#f4f1ea;
-  --shadow:0 1px 2px rgba(19,17,9,.04),0 12px 32px -16px rgba(19,17,9,.18);
+  color-scheme:dark;
+  --bg:#050505;--text:#f5f5f4;--muted:rgba(245,245,244,.62);--faint:rgba(245,245,244,.4);
+  --surface:rgba(255,255,255,.04);--surface-2:rgba(255,255,255,.07);--solid:#121212;
+  --border:rgba(255,255,255,.1);--border-2:rgba(255,255,255,.18);--hi:rgba(255,255,255,.06);
+  --accent:#f5f5f4;--accent-ink:#f5f5f4;--accent-soft:rgba(255,255,255,.08);--blue:#4d8bff;--yellow:#ffd34d;--pink:#ff5fb0;
+  --ok:#6ea0ff;--ok-soft:rgba(110,160,255,.12);--warn:#ffd34d;--warn-soft:rgba(255,211,77,.12);--bad:#ff7ac0;--bad-soft:rgba(255,122,192,.12);
+  --ink:#f5f5f4;--on-ink:#0a0a0a;
+  --shadow:none;
   --sans:"Figtree",ui-sans-serif,system-ui,sans-serif;--display:"Figtree",ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
@@ -34,9 +34,13 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
 ::selection{background:var(--accent);color:#fff}
 
 /* Background: warm white ground + a twisting rainbow silk ribbon drawn on a canvas (see the script in layout()). */
-.ribbon{position:fixed;inset:-8vh -8vw;width:calc(100% + 16vw);height:calc(100% + 16vh);z-index:0;pointer-events:none;transform:rotate(-6deg)}
-.ribbon.quiet{opacity:.4}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 40% at 50% 45%,rgba(251,250,246,.75),transparent 70%)}
+.ribbon{position:fixed;inset:-8vh -8vw;width:calc(100% + 16vw);height:calc(100% + 16vh);z-index:0;pointer-events:none;
+  transform:rotate(-6deg);filter:blur(38px) saturate(150%);opacity:.38;animation:ribbonGlow 8s ease-in-out infinite}
+.ribbon.quiet{opacity:.2;animation-name:ribbonGlowQuiet}
+/* mostly a soft haze; every few seconds it swells into a brighter glow, then settles */
+@keyframes ribbonGlow{0%,55%,100%{opacity:.38;filter:blur(38px) saturate(150%)}72%{opacity:.85;filter:blur(30px) saturate(175%)}}
+@keyframes ribbonGlowQuiet{0%,55%,100%{opacity:.18}72%{opacity:.4}}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(55% 38% at 50% 45%,rgba(5,5,5,.5),transparent 72%)}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -164,14 +168,16 @@ footer.foot a{color:var(--muted)}
 
 
 /* ---------- big centered brand ---------- */
-.brand{font:800 clamp(64px,13vw,148px)/.9 var(--display);letter-spacing:-.055em;margin:0;color:var(--text)}
+.brand{font:800 clamp(64px,13vw,148px)/.9 var(--display);letter-spacing:-.055em;margin:0;color:#fff;
+  text-shadow:0 0 18px rgba(255,255,255,.35),0 0 60px rgba(255,255,255,.18);animation:brandBreath 6s ease-in-out infinite}
+@keyframes brandBreath{50%{text-shadow:0 0 24px rgba(255,255,255,.5),0 0 80px rgba(255,255,255,.25)}}
 .thin{font-family:var(--display);font-weight:300;letter-spacing:-.03em;color:var(--text)}
 .tagline{font-size:clamp(20px,2.6vw,28px);line-height:1.3;margin:0}
 .lede.thin{font-family:var(--sans);font-weight:300;font-size:16px;opacity:.8}
 
 /* ---------- feedback (no glows; ink + hairlines) ---------- */
-button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{opacity:1;background:#2b2820}
-.beam:focus-within{box-shadow:0 8px 30px -12px rgba(19,17,9,.35)}
+button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{opacity:1;background:#d9d9d6}
+.beam:focus-within{box-shadow:0 0 30px -8px rgba(255,255,255,.25)}
 .rows>*:hover::before{box-shadow:inset 0 0 0 1px var(--border)}
 .copy{transition:border-color .3s var(--ease)}
 .copy:hover{border-color:var(--border-2)}
