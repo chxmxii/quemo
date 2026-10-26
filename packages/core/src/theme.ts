@@ -41,6 +41,11 @@ a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline
   animation:shardDrift var(--d) ease-in-out var(--delay) infinite alternate}
 @keyframes shardDrift{to{transform:rotate(calc(var(--r) + var(--tilt))) skewX(var(--k)) translate(var(--dx),var(--dy))}}
 @keyframes prismGlow{0%,55%,100%{opacity:.55}72%{opacity:1}}
+/* Water: a second copy of the shards run through an SVG displacement filter (#water) and masked to a soft circle
+   around the cursor. Moving the mouse stirs it (stronger warp + wider pool), then it calms back down. */
+.prism.water{filter:url(#water) blur(13px) saturate(150%);
+  -webkit-mask:radial-gradient(circle var(--wr,0px) at var(--wx,50%) var(--wy,50%),#000 0%,rgba(0,0,0,.6) 45%,transparent 100%);
+          mask:radial-gradient(circle var(--wr,0px) at var(--wx,50%) var(--wy,50%),#000 0%,rgba(0,0,0,.6) 45%,transparent 100%)}
 .veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(50% 34% at 50% 46%,rgba(5,5,5,.42),transparent 72%)}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
@@ -236,13 +241,6 @@ footer.foot{text-align:center}
 
 .brand{display:block;text-align:center}
 
-/* water ripples that trail the cursor (very light; mouse only, off for reduced motion) */
-.ripple{position:fixed;left:0;top:0;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;z-index:1;pointer-events:none;
-  border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 12px rgba(255,255,255,.07),0 0 10px rgba(180,200,255,.06);
-  -webkit-backdrop-filter:blur(1.2px) saturate(135%);backdrop-filter:blur(1.2px) saturate(135%);
-  animation:ripple 1.1s cubic-bezier(.2,.7,.3,1) forwards}
-@keyframes ripple{from{transform:translate(var(--x),var(--y)) scale(.15);opacity:.9}to{transform:translate(var(--x),var(--y)) scale(1);opacity:0}}
-
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .beam{position:relative;border-radius:999px;padding:1px;background:var(--border-2)}
@@ -301,8 +299,8 @@ const SHARDS = (() => {
   const out: string[] = [];
   for (let i = 0; i < 18; i++) {
     const long = rnd() > 0.35;
-    const w = long ? pick(16, 38) : pick(7, 16); // vw
-    const h = long ? pick(1.6, 5) : pick(4, 11); // vh
+    const w = long ? pick(30, 62) : pick(16, 30); // vw
+    const h = long ? pick(5, 12) : pick(10, 20); // vh
     // irregular 4-6 point outline = a "broken" fragment
     const n = 4 + Math.floor(rnd() * 3);
     const pts = Array.from({ length: n }, (_, k) => {
@@ -310,7 +308,7 @@ const SHARDS = (() => {
       return `${(50 + Math.cos(ang) * pick(38, 50)).toFixed(1)}% ${(50 + Math.sin(ang) * pick(30, 50)).toFixed(1)}%`;
     });
     const vars = {
-      "--o": pick(0.35, 0.85).toFixed(2),
+      "--o": pick(0.28, 0.7).toFixed(2),
       "--r": `${pick(-38, 38).toFixed(1)}deg`,
       "--k": `${pick(-22, 22).toFixed(1)}deg`,
       "--tilt": `${pick(-5, 5).toFixed(1)}deg`,
@@ -322,7 +320,7 @@ const SHARDS = (() => {
       "--clip": `polygon(${pts.join(",")})`,
     };
     const style = Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(";");
-    out.push(`<i style="left:${pick(-8, 88).toFixed(1)}%;top:${pick(-4, 92).toFixed(1)}%;width:${w.toFixed(1)}vw;height:${h.toFixed(1)}vh;${style}"></i>`);
+    out.push(`<i style="left:${pick(-20, 80).toFixed(1)}%;top:${pick(-8, 88).toFixed(1)}%;width:${w.toFixed(1)}vw;height:${h.toFixed(1)}vh;${style}"></i>`);
   }
   return out.join("");
 })();
@@ -349,7 +347,7 @@ export function layout({ title, body, variant = "app", head = "", bare = false, 
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body class="${variant === "report" ? "wide" : ""}${fill ? " fill" : ""}">
-<div class="prism" aria-hidden="true">${SHARDS}</div><div class="veil" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="water" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feTurbulence id="water-noise" type="fractalNoise" baseFrequency="0.006 0.011" numOctaves="2" seed="4" result="n"/><feDisplacementMap id="water-map" in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg><div class="prism" aria-hidden="true">${SHARDS}</div><div class="prism water" aria-hidden="true">${SHARDS}</div><div class="veil" aria-hidden="true"></div>
 ${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
@@ -369,11 +367,17 @@ document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(
 document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
   if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
 if(still)return;
-// water ripples: a faint ring spreads from the cursor every ~22px of movement (capped, mouse only)
-if(matchMedia("(hover:hover) and (pointer:fine)").matches){let lx=-99,ly=-99,live=0;
-  addEventListener("pointermove",e=>{if(Math.hypot(e.clientX-lx,e.clientY-ly)<22||live>10)return;lx=e.clientX;ly=e.clientY;
-    const r=document.createElement("span");r.className="ripple";r.setAttribute("aria-hidden","true");r.style.setProperty("--x",lx+"px");r.style.setProperty("--y",ly+"px");
-    live++;r.addEventListener("animationend",()=>{r.remove();live--});document.body.appendChild(r)},{passive:true})}
+// Water: cursor speed adds "energy"; energy widens the pool and deepens the warp, then decays. Loop sleeps when calm.
+const water=document.querySelector(".prism.water"),wmap=document.getElementById("water-map"),wnoise=document.getElementById("water-noise");
+if(water&&wmap&&matchMedia("(hover:hover) and (pointer:fine)").matches){let x=innerWidth/2,y=innerHeight/2,tx=x,ty=y,px=x,py=y,e=0,t=0,running=false;
+  const frame=()=>{x+=(tx-x)*.12;y+=(ty-y)*.12;e*=.94;t+=.016;
+    water.style.setProperty("--wx",(x+innerWidth*.06)+"px");water.style.setProperty("--wy",(y+innerHeight*.06)+"px");
+    water.style.setProperty("--wr",Math.min(340,e*4.5)+"px");wmap.setAttribute("scale",(e*.75).toFixed(1));
+    wnoise.setAttribute("baseFrequency",(0.006+Math.sin(t*1.7)*.0012).toFixed(4)+" "+(0.011+Math.cos(t*1.3)*.0015).toFixed(4));
+    if(e>.6)requestAnimationFrame(frame);else{running=false;water.style.setProperty("--wr","0px");wmap.setAttribute("scale","0")}};
+  addEventListener("pointermove",ev=>{tx=ev.clientX;ty=ev.clientY;e=Math.min(110,e+Math.hypot(tx-px,ty-py)*.35);px=tx;py=ty;
+    if(!running){running=true;requestAnimationFrame(frame)}},{passive:true})}
+
 })();
 </script>
 </body></html>`;
