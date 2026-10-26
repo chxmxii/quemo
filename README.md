@@ -133,6 +133,33 @@ Public URLs are derived from your `workers.dev` subdomain and stored in `deploy.
 
 **GitHub Actions:** CI runs typecheck, unit tests and e2e on every push. `deploy.yml` deploys only the Workers whose code changed. Enable it by adding the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets, a `QUEMO_DEPLOY_CONFIG` secret (contents of `deploy.config.json`), and the repo variable `QUEMO_DEPLOY_ENABLED=true`.
 
+## Backups
+
+Every night at 02:30 UTC, a GitHub Actions job in a **separate private repo** does the following:
+1. Exports all five D1 databases.
+2. Gzips each one and encrypts it with [age](https://age-encryption.org).
+3. Commits the snapshot. Days with no changes are skipped.
+
+Git history is the archive, so each commit is one restorable day. Only your private key can decrypt the files, so not even GitHub can read your data.
+
+```sh
+npm run backup:setup      # creates <you>/quemo-backups (private), an age key pair, the workflow, and the AGE_RECIPIENT secret
+gh secret set CLOUDFLARE_API_TOKEN -R <you>/quemo-backups   # token with Account · D1 · Edit
+gh secret set CLOUDFLARE_ACCOUNT_ID -R <you>/quemo-backups
+npm run backup:run        # back up now
+npm run backup:list       # history
+npm run backup:verify     # decrypt the latest snapshots locally and check row counts
+npm run backup:restore -- budget [--from <commit>]   # restores into a NEW database, never overwrites
+```
+
+The private key is at `~/.config/quemo/backup-key.txt`. **Keep a copy in your password manager.** Without it, the backups can't be decrypted.
+
+**Layers of protection:**
+- **D1 Time Travel:** built into Cloudflare. Restores any minute from the last 30 days: `npx wrangler d1 time-travel restore quemo-<app> --timestamp=…`
+- **Nightly encrypted snapshots:** kept in GitHub history indefinitely.
+
+OAuth grants in KV are not backed up. After a disaster, chat apps just sign in again.
+
 ## Connect your AI
 
 Sign in at your `quemo-auth` URL. The dashboard has copy-ready setup for every client:

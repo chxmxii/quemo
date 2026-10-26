@@ -32,6 +32,11 @@
     "deploy:workout": "node scripts/deploy.mjs workout",
     "deploy:health": "node scripts/deploy.mjs health",
     "deploy:food": "node scripts/deploy.mjs food",
-    "secret:resend": "npx wrangler secret put RESEND_API_KEY -c apps/auth/wrangler.jsonc"
+    "secret:resend": "npx wrangler secret put RESEND_API_KEY -c apps/auth/wrangler.jsonc",
+    "backup:setup": "node scripts/backup.mjs setup",
+    "backup:run": "node scripts/backup.mjs run",
+    "backup:list": "node scripts/backup.mjs list",
+    "backup:verify": "node scripts/backup.mjs verify",
+    "backup:restore": "node scripts/backup.mjs restore"
   }
 }
