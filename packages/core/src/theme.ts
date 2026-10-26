@@ -1,5 +1,5 @@
 /**
- * Quemo's shared look: white type on black, with a soft pastel prism arc of light that glows now and then.
+ * Quemo's shared look: white type on black, with broken shards of pastel rainbow light scattered across the page.
  * Used by quemo-auth pages and by every tool's printable report.
  *
  * Shape system: containers 20px, inputs 12px, buttons and chips are full pills.
@@ -33,16 +33,14 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* Background: a soft pastel prism arc (light refracting through glass) with a warm glare where it rises.
-   Pure CSS rings, heavily blurred; drifts slowly and swells brighter every few seconds. Same on every page. */
-.prism{position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(26px) saturate(115%);opacity:.7;
-  background:
-    radial-gradient(55% 45% at 88% 12%,rgba(255,244,222,.42),transparent 62%),
-    radial-gradient(circle at 86% 172%,transparent 57.5%,rgba(255,140,170,.5) 60%,rgba(255,205,140,.58) 62%,rgba(236,240,160,.55) 64%,rgba(160,232,200,.5) 66%,rgba(150,205,255,.48) 68%,rgba(205,175,255,.42) 70%,transparent 73.5%),
-    radial-gradient(circle at 86% 172%,transparent 64%,rgba(255,250,235,.16) 70%,transparent 78%);
-  animation:prismDrift 26s ease-in-out infinite alternate,prismGlow 8s ease-in-out infinite}
-@keyframes prismDrift{to{transform:translate(-3%,2%) rotate(-2deg)}}
-@keyframes prismGlow{0%,55%,100%{opacity:.62}72%{opacity:1}}
+/* Background: broken rainbow. Irregular shards of refracted light scattered over the page; each has its own
+   angle, size, clipped polygon outline and slow drift, and the whole field swells brighter every few seconds. */
+.prism{position:fixed;inset:-6%;z-index:0;pointer-events:none;filter:blur(13px) saturate(125%);animation:prismGlow 8s ease-in-out infinite}
+.prism i{position:absolute;display:block;opacity:var(--o);clip-path:var(--clip);transform:rotate(var(--r)) skewX(var(--k));
+  background:linear-gradient(var(--dir),transparent 0%,rgba(255,140,170,.95) 14%,rgba(255,205,140,.95) 30%,rgba(236,240,160,.9) 46%,rgba(160,232,200,.9) 62%,rgba(150,205,255,.9) 78%,rgba(205,175,255,.85) 90%,transparent 100%);
+  animation:shardDrift var(--d) ease-in-out var(--delay) infinite alternate}
+@keyframes shardDrift{to{transform:rotate(calc(var(--r) + var(--tilt))) skewX(var(--k)) translate(var(--dx),var(--dy))}}
+@keyframes prismGlow{0%,55%,100%{opacity:.55}72%{opacity:1}}
 .veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(50% 34% at 50% 46%,rgba(5,5,5,.42),transparent 72%)}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
@@ -71,7 +69,7 @@ p{margin:0}
 .spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
   background:radial-gradient(420px circle at var(--x) var(--y),var(--accent-soft),transparent 60%)}
 .spot:hover::after{opacity:1}
-@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.prism{opacity:.62}}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.prism{opacity:.6}}
 
 /* forms */
 .field{display:grid;gap:7px}
@@ -288,6 +286,40 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 }
 `;
 
+/** Deterministic "random" shards so every page shows the same broken-rainbow composition. */
+const SHARDS = (() => {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  const pick = (a: number, b: number) => a + rnd() * (b - a);
+  const out: string[] = [];
+  for (let i = 0; i < 18; i++) {
+    const long = rnd() > 0.35;
+    const w = long ? pick(16, 38) : pick(7, 16); // vw
+    const h = long ? pick(1.6, 5) : pick(4, 11); // vh
+    // irregular 4-6 point outline = a "broken" fragment
+    const n = 4 + Math.floor(rnd() * 3);
+    const pts = Array.from({ length: n }, (_, k) => {
+      const ang = (k / n) * Math.PI * 2 + pick(-0.35, 0.35);
+      return `${(50 + Math.cos(ang) * pick(38, 50)).toFixed(1)}% ${(50 + Math.sin(ang) * pick(30, 50)).toFixed(1)}%`;
+    });
+    const vars = {
+      "--o": pick(0.35, 0.85).toFixed(2),
+      "--r": `${pick(-38, 38).toFixed(1)}deg`,
+      "--k": `${pick(-22, 22).toFixed(1)}deg`,
+      "--tilt": `${pick(-5, 5).toFixed(1)}deg`,
+      "--dir": `${Math.round(pick(0, 180))}deg`,
+      "--d": `${pick(14, 30).toFixed(1)}s`,
+      "--delay": `${pick(-20, 0).toFixed(1)}s`,
+      "--dx": `${pick(-2.5, 2.5).toFixed(1)}vw`,
+      "--dy": `${pick(-2, 2).toFixed(1)}vh`,
+      "--clip": `polygon(${pts.join(",")})`,
+    };
+    const style = Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(";");
+    out.push(`<i style="left:${pick(-8, 88).toFixed(1)}%;top:${pick(-4, 92).toFixed(1)}%;width:${w.toFixed(1)}vw;height:${h.toFixed(1)}vh;${style}"></i>`);
+  }
+  return out.join("");
+})();
+
 export interface LayoutOptions {
   title: string;
   body: string;
@@ -310,7 +342,7 @@ export function layout({ title, body, variant = "app", head = "", bare = false, 
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body class="${variant === "report" ? "wide" : ""}${fill ? " fill" : ""}">
-<div class="prism" aria-hidden="true"></div><div class="veil" aria-hidden="true"></div>
+<div class="prism" aria-hidden="true">${SHARDS}</div><div class="veil" aria-hidden="true"></div>
 ${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
