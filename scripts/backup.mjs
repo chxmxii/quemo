@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Encrypted backups of every Quemo D1 database into a private GitHub repo.
+// Encrypted weekly backups of every Quemo D1 database into a private GitHub repo.
+// The backups run ON CLOUDFLARE: the quemo-backup Worker has a weekly cron (Mondays 02:30 UTC).
 //
-//   node scripts/backup.mjs setup [repo]       create the private repo, an age key pair, the nightly workflow and secrets
-//   node scripts/backup.mjs run [repo]         trigger a backup now (GitHub Actions)
+//   node scripts/backup.mjs setup [repo]       create the private repo + an age key pair, store settings, set Worker secrets
+//   node scripts/backup.mjs run                trigger a backup now (calls the deployed Worker)
 //   node scripts/backup.mjs list [repo]        show backup history
 //   node scripts/backup.mjs verify [repo]      decrypt the latest snapshots locally and check them
 //   node scripts/backup.mjs restore <app> [--from <commit>] [repo]
@@ -12,6 +13,7 @@
 // keep a copy somewhere safe (password manager). Without it, backups cannot be decrypted.
 import { execFileSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,6 +28,8 @@ const gh = (...args) => run("gh", args);
 
 function defaultRepo(arg) {
   if (arg && arg.includes("/")) return arg;
+  const saved = existsSync(join(root, "deploy.config.json")) ? JSON.parse(readFileSync(join(root, "deploy.config.json"), "utf8")).backupRepo : undefined;
+  if (!arg && saved) return saved;
   return `${gh("api", "user", "-q", ".login")}/${arg || "quemo-backups"}`;
 }
 
@@ -45,6 +49,10 @@ function clone(repo) {
   return dir;
 }
 
+const CONFIG = join(root, "deploy.config.json");
+const RUN_TOKEN = join(KEY_DIR, "backup-run-token");
+const loadConfig = () => (existsSync(CONFIG) ? JSON.parse(readFileSync(CONFIG, "utf8")) : {});
+
 function setup(repoArg) {
   const repo = defaultRepo(repoArg);
   const exists = (() => {
@@ -57,54 +65,65 @@ function setup(repoArg) {
   if (exists && exists !== "PRIVATE") throw new Error(`${repo} exists and is ${exists}. Backups must go to a private repo.`);
   if (!exists) {
     console.log(`Creating private repo ${repo}`);
-    gh("repo", "create", repo, "--private", "--description", "Encrypted Quemo database backups");
+    gh("repo", "create", repo, "--private", "--add-readme", "--description", "Encrypted weekly Quemo database backups");
   }
   const recipient = publicKey();
 
+  // README explaining the layout (the Worker needs an existing branch to commit onto).
   const dir = clone(repo);
-  mkdirSync(join(dir, ".github", "workflows"), { recursive: true });
-  writeFileSync(join(dir, ".github", "workflows", "backup.yml"), readFileSync(join(root, "backup", "backup.yml")));
   writeFileSync(
     join(dir, "README.md"),
     `# Quemo backups
 
-Nightly snapshots of every Quemo D1 database, gzip-compressed and encrypted with [age](https://age-encryption.org).
-Each commit is one day's backup; \`MANIFEST.txt\` lists row counts and checksums. Days without changes are skipped.
+Weekly snapshots of every Quemo D1 database, made on Cloudflare by the \`quemo-backup\` Worker (Mondays 02:30 UTC).
+Each dump is gzip-compressed and encrypted with [age](https://age-encryption.org). Each commit is one restorable week;
+\`MANIFEST.txt\` lists table/row counts and checksums. Weeks without changes are skipped.
 
 Only the holder of the private key (\`~/.config/quemo/backup-key.txt\`) can decrypt them.
-Restore with \`node scripts/backup.mjs restore <app>\` from the quemo repo.
+Restore with \`npm run backup:restore -- <app>\` from the quemo repo.
 `,
   );
   run("git", ["-C", dir, "add", "-A"]);
   try {
-    run("git", ["-C", dir, "-c", "user.name=quemo-backup", "-c", "user.email=quemo-backup@users.noreply.github.com", "commit", "-q", "-m", "Install nightly backup workflow"]);
+    run("git", ["-C", dir, "-c", "user.name=quemo-backup", "-c", "user.email=quemo-backup@users.noreply.github.com", "commit", "-q", "-m", "Describe backup layout"]);
     run("git", ["-C", dir, "push", "-q", "origin", "HEAD"]);
-  } catch {
-    console.log("Workflow already up to date.");
-  }
+  } catch {}
   rmSync(dir, { recursive: true, force: true });
 
-  gh("secret", "set", "AGE_RECIPIENT", "-R", repo, "-b", recipient);
-  console.log(`✓ ${repo} is ready (workflow + AGE_RECIPIENT secret).`);
-
-  const missing = ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"].filter((s) => !gh("secret", "list", "-R", repo).includes(s));
-  if (missing.length) {
-    console.log(`
-Two secrets left (they come from your Cloudflare account):
-  1. Create an API token at https://dash.cloudflare.com/profile/api-tokens
-     → Custom token → Permissions: Account · D1 · Edit → Create
-  2. Run:
-     gh secret set CLOUDFLARE_API_TOKEN -R ${repo}
-     gh secret set CLOUDFLARE_ACCOUNT_ID -R ${repo} -b "$(npx wrangler whoami 2>/dev/null | grep -oE '[0-9a-f]{32}' | head -1)"
-  3. Test it: node scripts/backup.mjs run`);
+  const c = loadConfig();
+  c.backupRepo = repo;
+  c.ageRecipient = recipient;
+  writeFileSync(CONFIG, `${JSON.stringify(c, null, 2)}\n`);
+  if (!existsSync(RUN_TOKEN)) {
+    writeFileSync(RUN_TOKEN, randomBytes(24).toString("base64url"));
+    chmodSync(RUN_TOKEN, 0o600);
   }
-  console.log(`\nKeep a copy of ${KEY} in your password manager. Lose it and the backups are unreadable.`);
+  console.log(`✓ Private repo ${repo} ready. Settings saved to deploy.config.json.
+
+Next:
+  1. Create a fine-grained GitHub token that can ONLY write to that repo:
+     https://github.com/settings/personal-access-tokens/new
+     → Repository access: Only select repositories → ${repo}
+     → Permissions: Contents → Read and write → Generate
+  2. Deploy the Worker and give it its secrets:
+     node scripts/deploy.mjs backup
+     npx wrangler secret put GITHUB_TOKEN -c apps/backup/wrangler.jsonc      (paste the token)
+     npx wrangler secret put RUN_TOKEN -c apps/backup/wrangler.jsonc < ${RUN_TOKEN}
+  3. Test it: npm run backup:run   then   npm run backup:verify
+
+Keep a copy of ${KEY} in your password manager. Lose it and the backups are unreadable.`);
 }
 
-function trigger(repoArg) {
-  const repo = defaultRepo(repoArg);
-  gh("workflow", "run", "backup", "-R", repo);
-  console.log(`Backup started. Watch it with: gh run watch -R ${repo}`);
+async function trigger() {
+  const c = loadConfig();
+  const url = c.urls?.backup ?? c.urls?.auth?.replace("quemo-auth", "quemo-backup");
+  if (!url) throw new Error("Deploy first (node scripts/deploy.mjs all)");
+  if (!existsSync(RUN_TOKEN)) throw new Error("No run token yet. Run: npm run backup:setup");
+  const res = await fetch(`${url}/run`, { method: "POST", headers: { Authorization: `Bearer ${readFileSync(RUN_TOKEN, "utf8").trim()}` } });
+  const body = await res.text();
+  if (!res.ok) throw new Error(`Backup failed (${res.status}): ${body}`);
+  const r = JSON.parse(body);
+  console.log(r.committed ? `✓ Backup committed (${r.sha.slice(0, 7)})\n${r.manifest}` : `✓ Nothing changed since the last backup.\n${r.manifest}`);
 }
 
 function list(repoArg) {
@@ -125,7 +144,7 @@ function verify(repoArg) {
     for (const app of APPS) {
       const sql = decrypt(join(dir, "snapshots", `quemo-${app}.sql.gz.age`));
       const rows = (sql.match(/^INSERT/gm) || []).length;
-      const expected = manifest.match(new RegExp(`quemo-${app} rows=(\\d+)`))?.[1];
+      const expected = manifest.match(new RegExp(`quemo-${app} .*?rows=(\\d+)`))?.[1];
       const ok = String(rows) === expected && /CREATE TABLE/.test(sql);
       console.log(`${ok ? "✓" : "✗"} quemo-${app}: ${rows} rows${ok ? "" : ` (manifest says ${expected})`}`);
       if (!ok) process.exitCode = 1;
@@ -165,13 +184,13 @@ const flag = (name) => {
 };
 try {
   if (cmd === "setup") setup(rest[0]);
-  else if (cmd === "run") trigger(rest[0]);
+  else if (cmd === "run") await trigger();
   else if (cmd === "list") list(rest[0]);
   else if (cmd === "verify") verify(rest[0]);
   else if (cmd === "restore") {
     const from = flag("--from");
     restore(rest[0], from, rest[1]);
-  } else console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(1, 12).join("\n").replace(/^\/\/ ?/gm, ""));
+  } else console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(1, 13).join("\n").replace(/^\/\/ ?/gm, ""));
 } catch (err) {
   console.error(`✗ ${err.message}`);
   process.exit(1);

@@ -3,7 +3,7 @@
 //
 //   node scripts/deploy.mjs setup            create D1 databases + KV, write their ids, run remote migrations
 //   node scripts/deploy.mjs all              deploy auth, then the four tools
-//   node scripts/deploy.mjs <app> [...]      deploy only these (auth | budget | workout | health | food)
+//   node scripts/deploy.mjs <app> [...]      deploy only these (auth | budget | workout | health | food | backup)
 //   node scripts/deploy.mjs migrate [app]    apply remote D1 migrations
 //   node scripts/deploy.mjs urls             print the public URLs
 //
@@ -39,7 +39,9 @@ function setup() {
       wrangler(["d1", "create", name]);
       db = JSON.parse(wrangler(["d1", "list", "--json"])).find((d) => d.name === name);
     }
-    patch(app, /("database_name": "quemo-[a-z]+", "database_id": ")[^"]+(")/, `$1${db.uuid}$2`);
+    const byName = new RegExp(`("database_name": "${name}", "database_id": ")[^"]+(")`);
+    patch(app, byName, `$1${db.uuid}$2`);
+    patch("backup", byName, `$1${db.uuid}$2`); // the backup Worker binds every database
     console.log(`✓ ${name} → ${db.uuid}`);
   }
   const kvs = JSON.parse(wrangler(["kv", "namespace", "list"]));
@@ -69,9 +71,15 @@ function urls() {
   const out = wrangler(["deploy", "-c", cfgPath("auth")]);
   const sub = out.match(/https:\/\/quemo-auth\.([a-z0-9-]+)\.workers\.dev/)?.[1];
   if (!sub) throw new Error(`Could not find the workers.dev URL in:\n${out}`);
-  c.urls = Object.fromEntries(APPS.map((a) => [a, `https://quemo-${a}.${sub}.workers.dev`]));
+  c.urls = Object.fromEntries([...APPS, "backup"].map((a) => [a, `https://quemo-${a}.${sub}.workers.dev`]));
   saveConfig(c);
   return c.urls;
+}
+
+function backupVars() {
+  const c = loadConfig();
+  if (!c.backupRepo || !c.ageRecipient) throw new Error("Backups aren't set up yet. Run: npm run backup:setup");
+  return { BACKUP_REPO: c.backupRepo, AGE_RECIPIENT: c.ageRecipient };
 }
 
 function deploy(app) {
@@ -79,7 +87,9 @@ function deploy(app) {
   const vars =
     app === "auth"
       ? { PUBLIC_URL: u.auth, BUDGET_URL: u.budget, WORKOUT_URL: u.workout, HEALTH_URL: u.health, FOOD_URL: u.food, ...(loadConfig().emailFrom ? { EMAIL_FROM: loadConfig().emailFrom } : {}) }
-      : { PUBLIC_URL: u[app], AUTH_URL: u.auth };
+      : app === "backup"
+        ? backupVars()
+        : { PUBLIC_URL: u[app], AUTH_URL: u.auth };
   console.log(`\nDeploying quemo-${app} → ${u[app]}`);
   wrangler(["deploy", "-c", cfgPath(app), ...Object.entries(vars).flatMap(([k, v]) => ["--var", `${k}:${v}`])], { inherit: true });
 }
@@ -88,6 +98,6 @@ const [cmd = "help", ...rest] = process.argv.slice(2);
 if (cmd === "setup") setup();
 else if (cmd === "migrate") migrate(rest.length ? rest : APPS);
 else if (cmd === "urls") console.log(urls());
-else if (cmd === "all") ["auth", ...TOOLS].forEach(deploy);
-else if (APPS.includes(cmd)) [cmd, ...rest].forEach(deploy);
+else if (cmd === "all") ["auth", ...TOOLS, ...(loadConfig().backupRepo ? ["backup"] : [])].forEach(deploy);
+else if ([...APPS, "backup"].includes(cmd)) [cmd, ...rest].forEach(deploy);
 else console.log(readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(1, 11).join("\n").replace(/^\/\/ ?/gm, ""));

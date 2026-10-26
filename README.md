@@ -88,6 +88,7 @@ packages/core   shared: theme (the neon city UI), report engine (Markdown + prin
 apps/auth       quemo-auth
 apps/budget     quemo-budget       apps/workout   quemo-workout
 apps/health     quemo-health       apps/food      quemo-food
+apps/backup     quemo-backup       weekly encrypted backups (cron Worker)
 scripts/        dev.mjs (run all locally), e2e.mjs (cross-worker test), deploy.mjs (setup + per-app deploy)
 ```
 
@@ -104,7 +105,7 @@ Open http://localhost:8787. In dev, sign-in codes are printed in the `[auth]` lo
 
 ```sh
 npm run typecheck
-npm test            # 147 tests: Workers runtime + real D1 per app (vitest-pool-workers)
+npm test            # 152 tests: Workers runtime + real D1 per app (vitest-pool-workers)
 npm run test:e2e    # boots all 5 Workers and walks the real journey across them
 ```
 
@@ -116,6 +117,7 @@ npm run test:e2e    # boots all 5 Workers and walks the real journey across them
 | workout | 34 | sets & units, PR detection, e1RM, progress, routines, body metrics, goals, streaks, reports, isolation, HTTP |
 | health | 35 | schedules & dose slots, stock, adherence, refills, vitals flags, symptoms, appointments, reports, isolation, HTTP |
 | food | 28 | meals & macros, saved foods, copy meal, water units, goals, daily summary, follow-up, reports, isolation, HTTP |
+| backup | 5 | dump → gzip → age → GitHub commit, exact restore into an empty DB (quotes, newlines, unicode, NULLs), skip-unchanged, refuses without key/token |
 | e2e | 38 checks | sign-up → API key → all tools → shared profile → reports → OAuth consent → audience-bound tokens |
 
 ## Deploy (Cloudflare free plan is enough)
@@ -135,18 +137,18 @@ Public URLs are derived from your `workers.dev` subdomain and stored in `deploy.
 
 ## Backups
 
-Every night at 02:30 UTC, a GitHub Actions job in a **separate private repo** does the following:
-1. Exports all five D1 databases.
-2. Gzips each one and encrypts it with [age](https://age-encryption.org).
-3. Commits the snapshot. Days with no changes are skipped.
+**Weekly, on Cloudflare.** The `quemo-backup` Worker has a cron trigger that runs every Monday at 02:30 UTC. Each run:
+1. Reads all five D1 databases through their bindings and builds a restorable SQL dump of each.
+2. Gzips each dump and encrypts it with [age](https://age-encryption.org).
+3. Commits everything in one commit to a **private** GitHub repo. Weeks with no changes are skipped.
 
-Git history is the archive, so each commit is one restorable day. Only your private key can decrypt the files, so not even GitHub can read your data.
+Git history is the archive. Only your private key can decrypt the files, so not even GitHub can read your data.
 
 ```sh
-npm run backup:setup      # creates <you>/quemo-backups (private), an age key pair, the workflow, and the AGE_RECIPIENT secret
-gh secret set CLOUDFLARE_API_TOKEN -R <you>/quemo-backups   # token with Account · D1 · Edit
-gh secret set CLOUDFLARE_ACCOUNT_ID -R <you>/quemo-backups
-npm run backup:run        # back up now
+npm run backup:setup      # private repo <you>/quemo-backups + age key pair; saves settings in deploy.config.json
+node scripts/deploy.mjs backup
+npx wrangler secret put GITHUB_TOKEN -c apps/backup/wrangler.jsonc   # fine-grained token: Contents R/W on that repo only
+npm run backup:run        # back up now (calls the Worker)
 npm run backup:list       # history
 npm run backup:verify     # decrypt the latest snapshots locally and check row counts
 npm run backup:restore -- budget [--from <commit>]   # restores into a NEW database, never overwrites
@@ -156,7 +158,7 @@ The private key is at `~/.config/quemo/backup-key.txt`. **Keep a copy in your pa
 
 **Layers of protection:**
 - **D1 Time Travel:** built into Cloudflare. Restores any minute from the last 30 days: `npx wrangler d1 time-travel restore quemo-<app> --timestamp=…`
-- **Nightly encrypted snapshots:** kept in GitHub history indefinitely.
+- **Weekly encrypted snapshots:** kept in GitHub history indefinitely.
 
 OAuth grants in KV are not backed up. After a disaster, chat apps just sign in again.
 

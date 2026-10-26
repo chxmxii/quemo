@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "quemo-backup",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Every Monday at 02:30 UTC.
+  "triggers": { "crons": ["30 2 * * 1"] },
+  "vars": {
+    // Set by `node scripts/deploy.mjs backup` from deploy.config.json.
+    "BACKUP_REPO": "",
+    "AGE_RECIPIENT": ""
+  },
+  // Secrets: GITHUB_TOKEN (fine-grained, Contents read/write on BACKUP_REPO only), RUN_TOKEN (optional manual trigger).
+  "d1_databases": [
+    { "binding": "AUTH_DB", "database_name": "quemo-auth", "database_id": "00000000-0000-0000-0000-000000000001" },
+    { "binding": "BUDGET_DB", "database_name": "quemo-budget", "database_id": "00000000-0000-0000-0000-000000000002" },
+    { "binding": "WORKOUT_DB", "database_name": "quemo-workout", "database_id": "00000000-0000-0000-0000-000000000003" },
+    { "binding": "HEALTH_DB", "database_name": "quemo-health", "database_id": "00000000-0000-0000-0000-000000000004" },
+    { "binding": "FOOD_DB", "database_name": "quemo-food", "database_id": "00000000-0000-0000-0000-000000000005" }
+  ]
+}

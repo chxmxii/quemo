@@ -1,0 +1,14 @@
+{
+  "name": "@quemo/backup",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "age-encryption": "^0.3.1"
+  }
+}
