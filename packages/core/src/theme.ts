@@ -1,5 +1,5 @@
 /**
- * Quemo's shared look: white type on black, with a heavily blurred rainbow ribbon that glows now and then.
+ * Quemo's shared look: white type on black, with a soft pastel prism arc of light that glows now and then.
  * Used by quemo-auth pages and by every tool's printable report.
  *
  * Shape system: containers 20px, inputs 12px, buttons and chips are full pills.
@@ -33,14 +33,17 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* Background: warm white ground + a twisting rainbow silk ribbon drawn on a canvas (see the script in layout()). */
-.ribbon{position:fixed;inset:-8vh -8vw;width:calc(100% + 16vw);height:calc(100% + 16vh);z-index:0;pointer-events:none;
-  transform:rotate(-6deg);filter:blur(38px) saturate(150%);opacity:.38;animation:ribbonGlow 8s ease-in-out infinite}
-.ribbon.quiet{opacity:.2;animation-name:ribbonGlowQuiet}
-/* mostly a soft haze; every few seconds it swells into a brighter glow, then settles */
-@keyframes ribbonGlow{0%,55%,100%{opacity:.38;filter:blur(38px) saturate(150%)}72%{opacity:.85;filter:blur(30px) saturate(175%)}}
-@keyframes ribbonGlowQuiet{0%,55%,100%{opacity:.18}72%{opacity:.4}}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(55% 38% at 50% 45%,rgba(5,5,5,.5),transparent 72%)}
+/* Background: a soft pastel prism arc (light refracting through glass) with a warm glare where it rises.
+   Pure CSS rings, heavily blurred; drifts slowly and swells brighter every few seconds. Same on every page. */
+.prism{position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(26px) saturate(115%);opacity:.7;
+  background:
+    radial-gradient(55% 45% at 88% 12%,rgba(255,244,222,.42),transparent 62%),
+    radial-gradient(circle at 86% 172%,transparent 57.5%,rgba(255,140,170,.5) 60%,rgba(255,205,140,.58) 62%,rgba(236,240,160,.55) 64%,rgba(160,232,200,.5) 66%,rgba(150,205,255,.48) 68%,rgba(205,175,255,.42) 70%,transparent 73.5%),
+    radial-gradient(circle at 86% 172%,transparent 64%,rgba(255,250,235,.16) 70%,transparent 78%);
+  animation:prismDrift 26s ease-in-out infinite alternate,prismGlow 8s ease-in-out infinite}
+@keyframes prismDrift{to{transform:translate(-3%,2%) rotate(-2deg)}}
+@keyframes prismGlow{0%,55%,100%{opacity:.62}72%{opacity:1}}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(50% 34% at 50% 46%,rgba(5,5,5,.42),transparent 72%)}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
@@ -68,7 +71,7 @@ p{margin:0}
 .spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
   background:radial-gradient(420px circle at var(--x) var(--y),var(--accent-soft),transparent 60%)}
 .spot:hover::after{opacity:1}
-@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.ribbon{display:none}}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.prism{opacity:.62}}
 
 /* forms */
 .field{display:grid;gap:7px}
@@ -279,7 +282,7 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 @media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
-  html,body{background:#fff!important;color:#111}.ribbon,.veil,.noprint,nav.top,footer.foot{display:none!important}
+  html,body{background:#fff!important;color:#111}.prism,.veil,.noprint,nav.top,footer.foot{display:none!important}
   .glass{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid #e4e4e7}
   .shell{max-width:none;padding:0}section,.kpi,tr{break-inside:avoid}h2,h3{break-after:avoid}
 }
@@ -288,7 +291,7 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 export interface LayoutOptions {
   title: string;
   body: string;
-  /** "hero" = full ribbon, "app" = faint ribbon, "report" = faint ribbon + print-first. */
+  /** "report" is print-first; every variant shares the same prism background. */
   variant?: "hero" | "app" | "report";
   head?: string;
   /** Hide the default top nav (pages that render their own). */
@@ -307,28 +310,14 @@ export function layout({ title, body, variant = "app", head = "", bare = false, 
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body class="${variant === "report" ? "wide" : ""}${fill ? " fill" : ""}">
-<canvas class="ribbon${variant === "hero" ? "" : " quiet"}" aria-hidden="true"></canvas><div class="veil" aria-hidden="true"></div>
+<div class="prism" aria-hidden="true"></div><div class="veil" aria-hidden="true"></div>
 ${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
 <script>
 (()=>{
 const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
-// Rainbow silk ribbon: ~44 thin strands share one wavy centre line; the ribbon's width swings through zero, which reads as a twist.
-const cv=document.querySelector(".ribbon");
-if(cv&&cv.getContext){const ctx=cv.getContext("2d");let W=0,H=0;
-  const size=()=>{const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)};
-  const N=44,STEP=7;
-  const draw=t=>{ctx.clearRect(0,0,W,H);const cy=H*.6,A=H*.085,band=H*.2;ctx.lineCap="round";
-    for(let i=0;i<N;i++){const u=i/(N-1)-.5;ctx.beginPath();
-      for(let x=-30;x<=W+30;x+=STEP){const k=x/W;
-        const c=cy+A*Math.sin(k*4.6+t*.32)+A*.5*Math.sin(k*10.4-t*.21);
-        const w=band*(.18+.82*Math.sin(k*2.7-t*.26));
-        const y=c+u*w+Math.sin(k*8+t*.45+u*3)*3;
-        x<=-30?ctx.moveTo(x,y):ctx.lineTo(x,y)}
-      const h=(i/N*330+t*6)%360;ctx.strokeStyle="hsla("+h+",95%,"+(58+Math.sin(i*.6+t)*6)+"%,.9)";ctx.lineWidth=Math.max(1.2,band/N*1.7);ctx.stroke()}};
-  size();addEventListener("resize",()=>{size();if(still)draw(0)});
-  if(still)draw(0);else{let last=0;const loop=ms=>{requestAnimationFrame(loop);if(document.hidden||ms-last<33)return;last=ms;draw(ms/1000)};requestAnimationFrame(loop)}}
+
 document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';b.classList.add("done");setTimeout(()=>{b.innerHTML=o;b.classList.remove("done")},1400)})});
 document.querySelectorAll(".spot").forEach(el=>el.addEventListener("pointermove",e=>{const r=el.getBoundingClientRect();el.style.setProperty("--x",(e.clientX-r.left)+"px");el.style.setProperty("--y",(e.clientY-r.top)+"px")}));
 document.addEventListener("submit",e=>{const b=e.submitter||e.target.querySelector("button");if(b&&!b.classList.contains("ghost"))setTimeout(()=>b.classList.add("loading"),0)});
@@ -358,7 +347,7 @@ export function htmlResponse(html: string, status = 200, headers: HeadersInit = 
       "Content-Type": "text/html; charset=utf-8",
       "X-Frame-Options": "DENY",
       "Content-Security-Policy": "frame-ancestors 'none'",
-      "Referrer-Policy": "no-referrer",
+      "Referrer-Policy": "same-origin", // never leaks report links to other sites
     },
   });
   new Headers(headers).forEach((v, k) => res.headers.append(k, v));

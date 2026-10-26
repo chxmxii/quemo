@@ -101,6 +101,14 @@ describe("sign-up & sign-in with one email", () => {
   it("blocks cross-site form posts", async () => {
     const res = await SELF.fetch(`${BASE}/auth/email`, form({ email: "x@quemo.test" }, { Origin: "https://evil.example" }));
     expect(res.status).toBe(403);
+    const fetchMeta = await SELF.fetch(`${BASE}/auth/email`, form({ email: "x@quemo.test" }, { "Sec-Fetch-Site": "cross-site", Origin: "null" }));
+    expect(fetchMeta.status).toBe(403);
+  });
+
+  it("accepts the site's own forms, even when the browser sends Origin: null", async () => {
+    const res = await SELF.fetch(`${BASE}/auth/email`, form({ email: `nullorigin${Date.now()}@quemo.test` }, { "Sec-Fetch-Site": "same-origin", Origin: "null" }));
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain("Check your inbox");
   });
 
   it("signs out", async () => {

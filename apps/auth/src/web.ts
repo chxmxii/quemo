@@ -298,9 +298,16 @@ const text = (body: string, status = 200) => new Response(body, { status, header
 
 const redirect = (location: string, headers: Record<string, string> = {}) => new Response(null, { status: 303, headers: { Location: location, ...headers } });
 
+/**
+ * Blocks form posts from other sites. Browsers send Sec-Fetch-Site on every request; when it's missing
+ * (old browsers, curl) fall back to Origin. Origin can legitimately be "null" for same-site forms
+ * under strict referrer policies, so "null" alone is not treated as cross-site.
+ */
 function sameOrigin(request: Request): boolean {
+  const site = request.headers.get("Sec-Fetch-Site");
+  if (site) return site === "same-origin" || site === "none";
   const origin = request.headers.get("Origin");
-  return !origin || origin === new URL(request.url).origin;
+  return !origin || origin === "null" || origin === new URL(request.url).origin;
 }
 
 function readCookie(request: Request, name: string): string | null {
