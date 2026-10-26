@@ -38,7 +38,7 @@ export async function handleWeb(request: Request, env: Env): Promise<Response | 
   try {
     switch (route) {
       case "GET /":
-        return (await currentUser(request, env)) ? redirect("/dashboard") : signInPage(url.searchParams.get("next"));
+        return (await currentUser(request, env)) ? redirect("/dashboard") : signInPage(url.searchParams.get("next"), undefined, undefined, url.searchParams.get("email") ?? "");
       case "POST /auth/email":
         return requestSignIn(request, env);
       case "GET /auth/verify":
@@ -83,7 +83,7 @@ async function requestSignIn(request: Request, env: Env): Promise<Response> {
   const email = normalizeEmail(String(form.get("email") ?? ""));
   const next = safeNext(String(form.get("next") ?? ""));
   const tz = String(form.get("tz") ?? "");
-  if (!isEmail(email)) return signInPage(next, "That doesn't look like an email address.");
+  if (!isEmail(email)) return signInPage(next, "That doesn't look like an email address.", undefined, email);
 
   // Registering and signing in are the same step: the first email creates the account.
   await env.DB.prepare("INSERT INTO users (id, email, timezone, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (email) DO NOTHING")
@@ -280,8 +280,8 @@ async function deleteAccount(request: Request, env: Env): Promise<Response> {
 
 // ---------- pages ----------
 
-function signInPage(next: string | null, error?: string, tool?: ToolId): Response {
-  return htmlResponse(signInView(next, error, tool), error ? 400 : 200);
+function signInPage(next: string | null, error?: string, tool?: ToolId, email = ""): Response {
+  return htmlResponse(signInView(next, error, tool, email.slice(0, 254)), error ? 400 : 200);
 }
 
 function checkInboxPage(email: string, next: string, notice?: string): Response {

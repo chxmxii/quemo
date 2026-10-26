@@ -10,7 +10,7 @@ export function page(title: string, body: string, variant: "hero" | "app" = "app
 
 const narrow = (inner: string) => `<section data-fill class="rise center" style="max-width:440px;margin:0 auto;padding:96px 0;display:grid;gap:28px">${inner}</section>`;
 
-export function signInView(next: string | null, error?: string, tool?: ToolId): string {
+export function signInView(next: string | null, error?: string, tool?: ToolId, email = ""): string {
   const body = `<section class="center" style="max-width:560px;margin:0 auto;display:grid;gap:34px;padding:80px 0">
   <div style="display:grid;gap:18px">
     ${tool ? `<p class="small muted rise">Connecting ${e(TOOLS[tool].name)}</p>` : ""}
@@ -20,7 +20,7 @@ export function signInView(next: string | null, error?: string, tool?: ToolId): 
   </div>
   <form method="post" action="/auth/email" class="rise d4" style="display:grid;gap:12px;max-width:400px;margin:0 auto">
     <input type="hidden" name="next" value="${e(safeNext(next))}"><input type="hidden" name="tz" id="tz">
-    <div class="beam"><input id="email" type="email" name="email" placeholder="you@company.com" aria-label="Email" autocomplete="email" required autofocus style="text-align:center"></div>
+    <div class="beam"><input id="email" type="email" name="email" value="${e(email)}" placeholder="you@company.com" aria-label="Email" autocomplete="email" required autofocus style="text-align:center"></div>
     ${error ? `<p class="small" style="color:var(--bad)">${e(error)}</p>` : ""}
     <button>Get my code<i class="ph ph-arrow-right"></i></button>
   </form>
@@ -43,10 +43,13 @@ export function checkInboxView(email: string, next: string, notice?: string): st
     ${notice ? `<p class="small" style="color:var(--warn)">${e(notice)}</p>` : ""}
     <button style="margin-top:4px;justify-self:center">Continue<i class="ph ph-arrow-right"></i></button>
   </form>
-  <form method="post" action="/auth/email">
-    <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
-    <button class="ghost sm">Resend code</button>
-  </form>`),
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <form method="post" action="/auth/email">
+      <input type="hidden" name="email" value="${e(email)}"><input type="hidden" name="next" value="${e(next)}">
+      <button class="ghost sm">Resend code</button>
+    </form>
+    <a class="btn ghost sm" href="/?${new URLSearchParams({ email, next }).toString()}">Use a different email</a>
+  </div>`),
   );
 }
 

@@ -52,6 +52,15 @@ describe("sign-up & sign-in with one email", () => {
     expect(await auth.getProfile(userId)).toMatchObject({ timezone: "America/New_York", currency: "EUR", units: "metric" });
   });
 
+  it("lets you go back and fix a mistyped email", async () => {
+    const html = await (await SELF.fetch(`${BASE}/auth/email`, form({ email: `typo${Date.now()}@quemo.test`, next: "/dashboard" }))).text();
+    const href = html.match(/href="(\/\?[^"]+)">Use a different email/)![1].replace(/&amp;/g, "&");
+    const back = await (await SELF.fetch(`${BASE}${href}`)).text();
+    expect(back).toMatch(/name="email" value="typo\d+@quemo\.test"/);
+    const bad = await (await SELF.fetch(`${BASE}/auth/email`, form({ email: "upchamsii.mouhib@" }))).text();
+    expect(bad).toContain('value="upchamsii.mouhib@"');
+  });
+
   it("rejects an invalid email", async () => {
     const res = await SELF.fetch(`${BASE}/auth/email`, form({ email: "not-an-email" }));
     expect(res.status).toBe(400);
