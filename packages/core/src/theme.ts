@@ -236,6 +236,13 @@ footer.foot{text-align:center}
 
 .brand{display:block;text-align:center}
 
+/* water ripples that trail the cursor (very light; mouse only, off for reduced motion) */
+.ripple{position:fixed;left:0;top:0;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;z-index:1;pointer-events:none;
+  border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 12px rgba(255,255,255,.07),0 0 10px rgba(180,200,255,.06);
+  -webkit-backdrop-filter:blur(1.2px) saturate(135%);backdrop-filter:blur(1.2px) saturate(135%);
+  animation:ripple 1.1s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes ripple{from{transform:translate(var(--x),var(--y)) scale(.15);opacity:.9}to{transform:translate(var(--x),var(--y)) scale(1);opacity:0}}
+
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
 .beam{position:relative;border-radius:999px;padding:1px;background:var(--border-2)}
@@ -362,6 +369,11 @@ document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(
 document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
   if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
 if(still)return;
+// water ripples: a faint ring spreads from the cursor every ~22px of movement (capped, mouse only)
+if(matchMedia("(hover:hover) and (pointer:fine)").matches){let lx=-99,ly=-99,live=0;
+  addEventListener("pointermove",e=>{if(Math.hypot(e.clientX-lx,e.clientY-ly)<22||live>10)return;lx=e.clientX;ly=e.clientY;
+    const r=document.createElement("span");r.className="ripple";r.setAttribute("aria-hidden","true");r.style.setProperty("--x",lx+"px");r.style.setProperty("--y",ly+"px");
+    live++;r.addEventListener("animationend",()=>{r.remove();live--});document.body.appendChild(r)},{passive:true})}
 })();
 </script>
 </body></html>`;
