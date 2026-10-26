@@ -1,5 +1,5 @@
 /**
- * Quemo's shared look: a smooth dusk-sky gradient behind frosted-glass surfaces, dark only.
+ * Quemo's shared look: ink-black type on a warm white ground with a twisting rainbow ribbon behind.
  * Used by quemo-auth pages and by every tool's printable report.
  *
  * Shape system: containers 20px, inputs 12px, buttons and chips are full pills.
@@ -11,21 +11,20 @@
 export const escapeHtml = (value: unknown) =>
   String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400;500;600&family=Space+Grotesk:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap";
 const ICONS = "https://unpkg.com/@phosphor-icons/web@2.1.1";
 
 export const THEME_CSS = `
 :root{
-  color-scheme:dark;
-  --bg:#050507;--text:#f2f2f4;--muted:#a1a1ab;--faint:#71717b;
-  --surface:rgba(26,26,31,.52);--surface-2:rgba(34,34,40,.72);--solid:#17171b;
-  --border:rgba(255,255,255,.08);--border-2:rgba(255,255,255,.14);--hi:rgba(255,255,255,.07);
-  --accent:#a78bfa;--accent-ink:#c4b5fd;--accent-soft:rgba(167,139,250,.14);--blue:#60a5fa;--yellow:#fde047;--pink:#f472b6;
-  --ok:#60a5fa;--ok-soft:rgba(96,165,250,.12);--warn:#fde047;--warn-soft:rgba(253,224,71,.12);--bad:#c084fc;--bad-soft:rgba(192,132,252,.12);
-  --ink:#f2f2f4;--on-ink:#111114;
-  --shadow:none;
-  --blob-a:#7c3aed;--blob-b:#2563eb;--blob-c:#eab308;--blob-o:.55;
-  --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--display:"Unbounded","Space Grotesk",ui-sans-serif,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
+  color-scheme:light;
+  --bg:#fbfaf6;--text:#131109;--muted:#13110999;--faint:#1311096b;
+  --surface:rgba(255,255,255,.62);--surface-2:rgba(255,255,255,.82);--solid:#ffffff;
+  --border:#1311091f;--border-2:#13110933;--hi:rgba(255,255,255,.8);
+  --accent:#131109;--accent-ink:#131109;--accent-soft:rgba(19,17,9,.06);--blue:#2f6bff;--yellow:#ffc928;--pink:#ff4fa3;
+  --ok:#1d4ed8;--ok-soft:rgba(47,107,255,.10);--warn:#9a6a00;--warn-soft:rgba(255,201,40,.18);--bad:#b4236b;--bad-soft:rgba(255,79,163,.10);
+  --ink:#131109;--on-ink:#f4f1ea;
+  --shadow:0 1px 2px rgba(19,17,9,.04),0 12px 32px -16px rgba(19,17,9,.18);
+  --sans:"Figtree",ui-sans-serif,system-ui,sans-serif;--display:"Figtree",ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box}
@@ -34,51 +33,23 @@ body{margin:0;min-height:100dvh;color:var(--text);font:15px/1.6 var(--sans);lett
 a{color:var(--accent-ink);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
 ::selection{background:var(--accent);color:#fff}
 
-/* GTA-style dusk sky: a smooth pink / purple / blue / yellow gradient that slowly breathes.
-   Base layer is a static gradient, the glow layer drifts very slowly (no pulsing). */
-.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-  background:
-    radial-gradient(100% 45% at 50% 115%,rgba(250,204,21,.28) 0%,rgba(236,72,153,.24) 30%,transparent 65%),
-    radial-gradient(70% 40% at 12% 105%,rgba(236,72,153,.28),transparent 60%),
-    radial-gradient(70% 40% at 88% 105%,rgba(139,92,246,.3),transparent 62%),
-    radial-gradient(90% 45% at 50% -12%,rgba(37,99,235,.22),transparent 60%),
-    linear-gradient(180deg,#05040c 0%,#07061a 55%,#130a26 85%,#1d0c2c 100%)}
-/* moving color layer: a big mesh of pink / purple / blue / yellow light that slowly swirls */
-.sky::before{content:"";position:absolute;left:50%;top:78vh;width:180vmax;height:180vmax;margin-left:-90vmax;opacity:.32;filter:blur(70px);
-  background:
-    radial-gradient(22% 18% at 30% 70%,#ec4899,transparent 70%),
-    radial-gradient(24% 20% at 70% 72%,#8b5cf6,transparent 70%),
-    radial-gradient(18% 14% at 50% 80%,#facc15,transparent 70%),
-    radial-gradient(26% 20% at 50% 35%,#2563eb,transparent 70%),
-    radial-gradient(20% 16% at 22% 40%,#8b5cf6,transparent 70%),
-    radial-gradient(20% 16% at 78% 42%,#ec4899,transparent 70%);
-  animation:swirl 26s linear infinite}
-@keyframes swirl{to{transform:rotate(360deg)}}
-.sky::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#05040c 0%,rgba(5,4,12,.85) 35%,transparent 70%)}
-.sky i{position:absolute;border-radius:50%;filter:blur(80px);opacity:.3;will-change:transform,background-color}
-.sky i:nth-child(1){width:44vmax;height:26vmax;left:-10vmax;bottom:-16vmax;background:#ec4899;animation:skyA 14s ease-in-out infinite alternate,tint 18s linear infinite}
-.sky i:nth-child(2){width:44vmax;height:26vmax;right:-10vmax;bottom:-15vmax;background:#8b5cf6;animation:skyB 17s ease-in-out infinite alternate,tint 18s linear -6s infinite}
-.sky i:nth-child(3){width:40vmax;height:24vmax;left:50%;bottom:-8vmax;margin-left:-20vmax;background:#facc15;opacity:.22;animation:skyC 11s ease-in-out infinite alternate}
-.sky i:nth-child(4){width:56vmax;height:22vmax;left:50%;top:-16vmax;margin-left:-28vmax;background:#2563eb;opacity:.2;z-index:1;animation:skyTop 20s ease-in-out infinite alternate}
-.sky.quiet{opacity:.7}
-@keyframes skyA{to{transform:translate(22vmax,-4vmax) scale(1.15)}}
-@keyframes skyB{to{transform:translate(-22vmax,-4vmax) scale(1.12)}}
-@keyframes skyTop{to{transform:translate(6vmax,2vmax) scale(1.1)}}
-@keyframes skyC{to{transform:translate(0,-4vmax) scale(1.2)}}
-@keyframes tint{0%,100%{background-color:#ec4899}33%{background-color:#8b5cf6}66%{background-color:#2563eb}}
+/* Background: warm white ground + a twisting rainbow silk ribbon drawn on a canvas (see the script in layout()). */
+.ribbon{position:fixed;inset:-8vh -8vw;width:calc(100% + 16vw);height:calc(100% + 16vh);z-index:0;pointer-events:none;transform:rotate(-6deg)}
+.ribbon.quiet{opacity:.4}
+.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 40% at 50% 45%,rgba(251,250,246,.75),transparent 70%)}
 @keyframes driftC{to{transform:translate(14vmax,-6vmax) scale(1.12)}}
 .grain{display:none}
 
 .shell{position:relative;z-index:2;width:100%;max-width:760px;margin:0 auto;padding:0 20px}
 .wide .shell,.wide footer.foot{max-width:1000px}
 nav.top{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 0 0}
-.wordmark{display:inline-flex;align-items:center;gap:10px;font:500 15px/1 var(--display);letter-spacing:.32em;text-transform:uppercase;color:var(--text)}
+.wordmark{display:inline-flex;align-items:center;gap:9px;font:800 19px/1 var(--display);letter-spacing:-.04em;color:var(--text)}
 .wordmark:hover{text-decoration:none}
-.mark{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px 2px var(--accent);animation:breathe 3.2s ease-in-out infinite}
+.mark{width:12px;height:12px;border-radius:50%;background:conic-gradient(#ff4fa3,#ffc928,#3ddc84,#2f6bff,#8b5cf6,#ff4fa3)}
 
-h1,h2,h3{margin:0;font-family:var(--display);font-weight:500;letter-spacing:-.02em;color:var(--text)}
-h1{font-size:clamp(30px,4.6vw,48px);line-height:1.12;font-weight:400}
-h2{font-size:12px;line-height:1.4;letter-spacing:.22em;text-transform:uppercase;font-weight:400;color:var(--muted)}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:400;letter-spacing:-.035em;color:var(--text)}
+h1{font-size:clamp(32px,4.4vw,56px);line-height:1.06;font-weight:400}
+h2{font-size:13px;line-height:1.4;letter-spacing:.01em;font-weight:600;color:var(--muted)}
 h3{font-size:14px;line-height:1.4;letter-spacing:.02em}
 .accent{color:var(--accent-ink)}
 .lede{font-size:16px;line-height:1.6;color:var(--muted);max-width:40ch;margin:0}
@@ -93,11 +64,11 @@ p{margin:0}
 .spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s var(--ease);
   background:radial-gradient(420px circle at var(--x) var(--y),var(--accent-soft),transparent 60%)}
 .spot:hover::after{opacity:1}
-@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.sky i{display:none}}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--solid);-webkit-backdrop-filter:none;backdrop-filter:none}.ribbon{display:none}}
 
 /* forms */
 .field{display:grid;gap:7px}
-label,.label{font:400 11px/1.4 var(--display);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+label,.label{font:500 13px/1.4 var(--display);color:var(--muted)}
 .hint{font-size:12.5px;color:var(--muted)}
 input,select{font:inherit;font-size:15px;color:var(--text);background:var(--solid);border:1px solid var(--border-2);border-radius:12px;padding:12px 14px;width:100%;outline:none;
   transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
@@ -110,7 +81,7 @@ input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--a
   background-image:repeating-linear-gradient(90deg,transparent 0 44px,var(--border-2) 44px 45px,transparent 45px 47px)}
 
 /* buttons */
-.btn,button{font:500 12.5px/1.2 var(--display);letter-spacing:.14em;text-transform:uppercase;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
+.btn,button{font:600 14.5px/1.2 var(--display);letter-spacing:-.01em;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;cursor:pointer;
   border:0;border-radius:999px;padding:11px 20px;color:var(--on-ink);background:var(--ink);text-decoration:none;
   transition:transform .15s var(--ease),box-shadow .25s var(--ease),background .2s var(--ease)}
 .btn:hover,button:hover{text-decoration:none;opacity:.88}
@@ -193,25 +164,20 @@ footer.foot a{color:var(--muted)}
 
 
 /* ---------- big centered brand ---------- */
-.brand{font:500 clamp(56px,13vw,132px)/1 var(--display);letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;margin:0;color:var(--text);}
-.thin{font-family:var(--display);font-weight:200;letter-spacing:.01em;color:var(--text)}
+.brand{font:800 clamp(64px,13vw,148px)/.9 var(--display);letter-spacing:-.055em;margin:0;color:var(--text)}
+.thin{font-family:var(--display);font-weight:300;letter-spacing:-.03em;color:var(--text)}
 .tagline{font-size:clamp(20px,2.6vw,28px);line-height:1.3;margin:0}
 .lede.thin{font-family:var(--sans);font-weight:300;font-size:16px;opacity:.8}
 
-/* ---------- glow ---------- */
-@keyframes breathe{50%{box-shadow:0 0 22px 6px var(--accent);opacity:.85}}
-.reveal{animation:textGlow 4.5s ease-in-out 1.4s infinite}
-@keyframes textGlow{0%,100%{text-shadow:0 0 0 transparent}50%{text-shadow:0 0 28px var(--accent-soft),0 0 2px var(--accent-soft)}}
-button:not(.ghost):not(.danger),.btn:not(.ghost){box-shadow:0 0 0 0 rgba(139,92,246,0);animation:aura 3.6s ease-in-out infinite}
-@keyframes aura{50%{box-shadow:0 0 28px -2px rgba(139,92,246,.45)}}
-button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{box-shadow:0 0 36px 0 rgba(139,92,246,.6);opacity:1}
-.beam:focus-within{box-shadow:0 0 30px -4px rgba(139,92,246,.45)}
-.rows>*:hover::before{box-shadow:0 0 30px -8px rgba(139,92,246,.4),inset 0 0 0 1px rgba(139,92,246,.25)}
-.copy{transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
-.copy:hover{border-color:rgba(139,92,246,.35);box-shadow:0 0 24px -8px rgba(139,92,246,.45)}
-.tablist .ind{box-shadow:0 0 18px -4px rgba(139,92,246,.5),0 1px 3px rgba(0,0,0,.08)}
-.otp{font-family:var(--display);font-weight:300}
-.kpi b{font-family:var(--display);font-weight:400}
+/* ---------- feedback (no glows; ink + hairlines) ---------- */
+button:not(.ghost):not(.danger):hover,.btn:not(.ghost):hover{opacity:1;background:#2b2820}
+.beam:focus-within{box-shadow:0 8px 30px -12px rgba(19,17,9,.35)}
+.rows>*:hover::before{box-shadow:inset 0 0 0 1px var(--border)}
+.copy{transition:border-color .3s var(--ease)}
+.copy:hover{border-color:var(--border-2)}
+.otp{font-family:var(--mono);font-weight:500}
+.kpi b{font-family:var(--display);font-weight:600;letter-spacing:-.04em}
+.rotator{color:var(--text)}
 
 /* everything on the middle axis */
 .center .rows,.center .tabpanel{text-align:center}
@@ -244,11 +210,6 @@ footer.foot{text-align:center}
 @view-transition{navigation:auto}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.38s;animation-timing-function:cubic-bezier(.16,1,.3,1)}
 
-/* cursor-following glow (positioned by JS) */
-.glow{position:fixed;left:0;top:0;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;z-index:0;pointer-events:none;
-  background:radial-gradient(circle,var(--accent-soft) 0%,transparent 65%);opacity:0;transition:opacity .6s ease;will-change:transform}
-.glow.on{opacity:1}
-@media (hover:none){.glow{display:none}.sky i,.sky::before{animation:none}}
 
 /* word-by-word blur reveal */
 .reveal .w{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(.25em);animation:wordIn .9s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 80ms)}
@@ -262,27 +223,27 @@ footer.foot{text-align:center}
 .rotator:not(.js)>span:first-child,.rotator>span.on{opacity:1;filter:blur(0);transform:none}
 .rotator:not(.js){width:auto}.rotator:not(.js)>span:first-child{position:static}
 .rotator>span.on{animation:wordFlash 1.6s var(--ease)}
-.rotator>span:nth-child(4n+1){--c:#8b5cf6}.rotator>span:nth-child(4n+2){--c:#3b82f6}.rotator>span:nth-child(4n+3){--c:#ec4899}.rotator>span:nth-child(4n){--c:#facc15}
-@keyframes wordFlash{0%{color:var(--c);text-shadow:0 0 22px var(--c),0 0 6px var(--c)}55%{color:var(--c);text-shadow:0 0 16px var(--c)}100%{color:var(--text);text-shadow:0 0 0 transparent}}
+.rotator>span:nth-child(4n+1){--c:#ff4fa3}.rotator>span:nth-child(4n+2){--c:#2f6bff}.rotator>span:nth-child(4n+3){--c:#8b5cf6}.rotator>span:nth-child(4n){--c:#f59e0b}
+@keyframes wordFlash{0%,45%{color:var(--c)}100%{color:var(--text)}}
 .rotator>span.out{opacity:0;filter:blur(8px);transform:translateY(-.45em)}
 
 .brand{display:block;text-align:center}
 
 /* light beam that orbits a field while it is focused */
 @property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
-.beam{position:relative;border-radius:14px;padding:1px;background:var(--border-2)}
+.beam{position:relative;border-radius:999px;padding:1px;background:var(--border-2)}
 .beam::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;opacity:0;transition:opacity .35s ease;
-  background:conic-gradient(from var(--a),transparent 0 58%,var(--blue) 68%,var(--accent) 78%,var(--pink) 86%,var(--yellow) 93%,transparent 98%);
+  background:conic-gradient(from var(--a),#ff4fa3,#ffc928,#3ddc84,#2f6bff,#8b5cf6,#ff4fa3);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 2.6s linear infinite}
 .beam:focus-within::before{opacity:1}
-.beam input{border:0;border-radius:13px;box-shadow:none!important}
+.beam input{border:0;border-radius:999px;box-shadow:none!important;padding:14px 20px}
 @keyframes spin{to{--a:360deg}}
 
 /* buttons: sliding arrow, shine sweep, loading shimmer */
 .btn .ph-arrow-right,button .ph-arrow-right{transition:transform .3s var(--ease)}
 .btn:hover .ph-arrow-right,button:hover .ph-arrow-right{transform:translateX(3px)}
 button:not(.ghost){position:relative;overflow:hidden}
-button:not(.ghost)::after{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%)}
+button:not(.ghost)::after{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%)}
 button:not(.ghost):hover::after{transform:translateX(120%);transition:transform .8s var(--ease)}
 button.loading{pointer-events:none;opacity:.75}
 button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
@@ -308,11 +269,11 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 /* copy feedback */
 [data-copy].done{color:var(--ok)}
 
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}.glow{display:none}.sky i,.sky::before{animation:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.reveal .w,.rows.stagger>*{opacity:1;filter:none;transform:none}.rotator>span{transition:none}}
 @media (max-width:767px){.glass.pad{padding:20px}.bar{grid-template-columns:1fr auto}.bar .track{grid-column:1/-1;grid-row:2}.otp{font-size:24px}}
 @media print{
   :root{--bg:#fff;--text:#111;--muted:#555;--border:#e4e4e7;--surface:#fff;--surface-2:#fafafa}
-  html,body{background:#fff!important;color:#111}.sky,.noprint,nav.top,footer.foot{display:none!important}
+  html,body{background:#fff!important;color:#111}.ribbon,.veil,.noprint,nav.top,footer.foot{display:none!important}
   .glass{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid #e4e4e7}
   .shell{max-width:none;padding:0}section,.kpi,tr{break-inside:avoid}h2,h3{break-after:avoid}
 }
@@ -321,7 +282,7 @@ button.loading::after{transform:none;animation:shimmer 1.1s linear infinite}
 export interface LayoutOptions {
   title: string;
   body: string;
-  /** "hero" = full sky, "app" = dimmer sky, "report" = dimmer sky + print-first. */
+  /** "hero" = full ribbon, "app" = faint ribbon, "report" = faint ribbon + print-first. */
   variant?: "hero" | "app" | "report";
   head?: string;
   /** Hide the default top nav (pages that render their own). */
@@ -340,14 +301,28 @@ export function layout({ title, body, variant = "app", head = "", bare = false, 
 <script src="${ICONS}"></script>
 <link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><radialGradient id="g" cx=".2" cy=".1" r="1.2"><stop offset="0" stop-color="#facc15"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#3b82f6"/></radialGradient></defs><rect width="64" height="64" rx="18" fill="url(#g)"/><text x="32" y="44" font-family="system-ui,sans-serif" font-weight="600" font-size="36" text-anchor="middle" fill="#fff">q</text></svg>`)}">
 <style>${THEME_CSS}</style>${head}</head><body class="${variant === "report" ? "wide" : ""}${fill ? " fill" : ""}">
-<div class="sky${variant === "hero" ? "" : " quiet"}" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<canvas class="ribbon${variant === "hero" ? "" : " quiet"}" aria-hidden="true"></canvas><div class="veil" aria-hidden="true"></div>
 ${bare ? "" : `<div class="shell navwrap"><nav class="top">${wordmark()}<a class="small muted" href="https://github.com/chxmxii/quemo" rel="noopener">GitHub</a></nav></div>`}
 <main class="shell">${body}</main>
 <footer class="foot noprint"><span>quemo</span><a href="https://github.com/chxmxii/quemo" rel="noopener">Open source</a></footer>
-<div class="glow" aria-hidden="true"></div>
 <script>
 (()=>{
 const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Rainbow silk ribbon: ~44 thin strands share one wavy centre line; the ribbon's width swings through zero, which reads as a twist.
+const cv=document.querySelector(".ribbon");
+if(cv&&cv.getContext){const ctx=cv.getContext("2d");let W=0,H=0;
+  const size=()=>{const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)};
+  const N=44,STEP=7;
+  const draw=t=>{ctx.clearRect(0,0,W,H);const cy=H*.6,A=H*.085,band=H*.2;ctx.lineCap="round";
+    for(let i=0;i<N;i++){const u=i/(N-1)-.5;ctx.beginPath();
+      for(let x=-30;x<=W+30;x+=STEP){const k=x/W;
+        const c=cy+A*Math.sin(k*4.6+t*.32)+A*.5*Math.sin(k*10.4-t*.21);
+        const w=band*(.18+.82*Math.sin(k*2.7-t*.26));
+        const y=c+u*w+Math.sin(k*8+t*.45+u*3)*3;
+        x<=-30?ctx.moveTo(x,y):ctx.lineTo(x,y)}
+      const h=(i/N*330+t*6)%360;ctx.strokeStyle="hsla("+h+",95%,"+(58+Math.sin(i*.6+t)*6)+"%,.9)";ctx.lineWidth=Math.max(1.2,band/N*1.7);ctx.stroke()}};
+  size();addEventListener("resize",()=>{size();if(still)draw(0)});
+  if(still)draw(0);else{let last=0;const loop=ms=>{requestAnimationFrame(loop);if(document.hidden||ms-last<33)return;last=ms;draw(ms/1000)};requestAnimationFrame(loop)}}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const t=document.getElementById(b.dataset.copy);navigator.clipboard.writeText(t.innerText).then(()=>{const o=b.innerHTML;b.innerHTML='<i class="ph ph-check"></i>Copied';b.classList.add("done");setTimeout(()=>{b.innerHTML=o;b.classList.remove("done")},1400)})});
 document.querySelectorAll(".spot").forEach(el=>el.addEventListener("pointermove",e=>{const r=el.getBoundingClientRect();el.style.setProperty("--x",(e.clientX-r.left)+"px");el.style.setProperty("--y",(e.clientY-r.top)+"px")}));
 document.addEventListener("submit",e=>{const b=e.submitter||e.target.querySelector("button");if(b&&!b.classList.contains("ghost"))setTimeout(()=>b.classList.add("loading"),0)});
@@ -360,8 +335,6 @@ document.querySelectorAll(".tabs").forEach(tabs=>{const list=tabs.querySelector(
 document.querySelectorAll(".rotator").forEach(r=>{const w=[...r.children];let i=0;r.classList.add("js");w[0].classList.add("on");const fit=()=>{r.style.width=w[i].getBoundingClientRect().width+"px"};fit();addEventListener("resize",fit);document.fonts&&document.fonts.ready.then(fit);
   if(still)return;setInterval(()=>{const a=w[i];a.classList.remove("on");a.classList.add("out");setTimeout(()=>a.classList.remove("out"),600);i=(i+1)%w.length;w[i].classList.add("on");fit()},2600)});
 if(still)return;
-// cursor glow with easing
-const g=document.querySelector(".glow");if(g&&matchMedia("(hover:hover)").matches){let x=innerWidth/2,y=innerHeight/3,tx=x,ty=y;addEventListener("pointermove",e=>{tx=e.clientX;ty=e.clientY;g.classList.add("on")});(function f(){x+=(tx-x)*.08;y+=(ty-y)*.08;g.style.transform="translate("+x+"px,"+y+"px)";requestAnimationFrame(f)})()}
 })();
 </script>
 </body></html>`;
