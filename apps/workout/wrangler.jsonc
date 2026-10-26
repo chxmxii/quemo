@@ -11,7 +11,7 @@
   },
   "services": [{ "binding": "AUTH", "service": "quemo-auth" }],
   "d1_databases": [
-    { "binding": "DB", "database_name": "quemo-workout", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "quemo-workout", "database_id": "b346c92d-256f-473f-b600-05126ab9038f", "migrations_dir": "migrations" }
   ],
   // Daily purge of data belonging to deleted accounts.
   "triggers": { "crons": ["17 3 * * *"] }

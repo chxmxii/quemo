@@ -16,8 +16,8 @@
     "EMAIL_FROM": "Quemo <onboarding@resend.dev>"
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "quemo-auth", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "quemo-auth", "database_id": "5222d77c-449c-42e7-b0c5-5c69fcbff969", "migrations_dir": "migrations" }
   ],
-  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "00000000000000000000000000000000" }]
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "f8fda6dd037b4d4bb8a969bac433ae0a" }]
   // Secret: RESEND_API_KEY (wrangler secret put RESEND_API_KEY). Without it, sign-in codes are logged instead of emailed.
 }
